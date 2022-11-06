@@ -1,86 +1,74 @@
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 
-let sinks = null
-
 const getSinks = async () => {
-    cmd = `pactl list sinks`
-    const { stdout, sterr } = await exec(cmd)
-    const sinks = {};
-    let lastSink = null;
-    let propertyPhase = false;
-    for(const line of stdout.split("\n")) {
-        if(line.startsWith("Sink #")) {
-            lastSink = line.substr(6);
-            propertyPhase = false
-            sinks[lastSink] = {
-                number: lastSink,
-                properties: {}
-            }
-            continue
-        }
-        if(line.trim() == "Properties:") {
-            propertyPhase = true
-            continue
-        }
-        if(propertyPhase === false) {
-            if( line.trim().startsWith("Volume:") ) {
-              let splitted = line.trim().substr(7).trim().split(",")
-              sinks[lastSink]["volumes"] = {}
-              for(let volume of splitted) {
-                let [key, value] = volume.split(":")
-                sinks[lastSink]["volumes"][key.trim()] = value
-              }
-              continue
-            }
-            if( line.trim().startsWith("balance") ) {
-              sinks[lastSink]["volumes"]["balance"] = line.trim().substr(8)
-              continue
-            }
-            let splitted = line.split(":");
-            sinks[lastSink][splitted[0].trim().toLowerCase()] = splitted[1] ? splitted[1].trim() : splitted[1]
-            continue
-        }
-        let splitted = line.split("=")
-        sinks[lastSink]["properties"][splitted[0].trim()] = splitted[1]
-    }
-    return sinks;
+  const {stdout, stderr} = await exec("pactl -f json list sinks")
+    return JSON.parse(stdout)
+}
+
+const getSinkInputs = async () => {
+  const {stdout, stderr} = await exec("pactl -f json list sink-inputs")
+  return JSON.parse(stdout)
 }
 
 
-const getSinkNumber = (name) => {
-  for(const [sinkNumber, sink] of Object.entries(sinks)) {
+const getSinkByName = async (name) => {
+  for(const sink of await getSinks()) {
     if(sink.name == name) {
-      return sinkNumber
+      return sink
     }
   }
 }
 
-const getSinkVolume = (name) => {
-  const sink = sinks[getSinkNumber(name)]
-  if(sink.mute == 'yes') {
-    return "----"
+const getSinkInputsByAppName = async (name) => {
+  const sinks = []
+  const result = await getSinkInputs()
+  for(const sink of result){
+    if(sink.properties["application.name"] == name) {
+      sinks.push(sink)
+    }
   }
-  const regEx = / ([0-9]+)% /i
-  return sink.volumes["front-left"].match(regEx)[1]
+  return sinks
+}
+
+const getSinkVolume = async (name) => {
+  const sink = await getSinkByName(name)
+  if(sink.mute) return "----"
+  return sink.volume["front-left"]["value_percent"]
+}
+
+const getSinkInputVolume = async (name) => {
+  const sink = (await getSinkInputsByAppName(name))[0]
+  if(sink.mute) return "----"
+  return sink.volume["front-left"]["value_percent"]
 }
 
 const setSinkVolume = async (name, volume) => {
-  const sinkNumber = getSinkNumber(name)
-  cmd = `pactl set-sink-volume ${sinkNumber} ${volume}`
+  const sink = await getSinkByName(name)
+  cmd = `pactl set-sink-volume ${sink.index} ${volume}`
   await exec(cmd)
-  sinks = await getSinks()
+}
+
+const setSinkInputVolume = async (name, volume) => {
+  const sinks = await getSinkInputsByAppName(name)
+  for( const sink of sinks ) {
+    cmd = `pactl set-sink-input-volume ${sink.index} ${volume}`
+    await exec(cmd)
+  }
 }
 
 const toggleMute = async (name) => {
-  const sinkNumber = getSinkNumber(name)
-  const cmd = `pactl set-sink-mute ${sinkNumber} toggle`
+  const sink = await getSinkByName(name)
+  const cmd = `pactl set-sink-mute ${sink.index} toggle`
   await exec(cmd)
-  sinks = await getSinks()
 }
 
-const init = async () => {
-  sinks = await getSinks()
+const toggleSinkInputMute = async (name, volume) => {
+  const sinks = await getSinkInputsByAppName(name)
+  for( const sink of sinks ) {
+    cmd = `pactl set-sink-input-mute ${sink.index} toggle`
+    await exec(cmd)
+  }
 }
 
-module.exports = { init, getSinkVolume, setSinkVolume, toggleMute }
+module.exports = { getSinkVolume, setSinkVolume, toggleMute, getSinkInputVolume, setSinkInputVolume, toggleSinkInputMute }

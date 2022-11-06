@@ -39,7 +39,8 @@ process.on('SIGINT', async () => {
 });
 
 const start = async () => {
-    await pactl.init()
+    // await pactl.init()
     establishConnection()
+    // console.log(await pactl.getSinkInputs())
 }
 start()

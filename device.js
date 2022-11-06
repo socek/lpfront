@@ -43,8 +43,8 @@ device.on('disconnect', (payload) => {
 })
 
 device.on('down', ({ id }) => {
-    if(id == "knobTL") {
-      toggleMute()
+    if(id.startsWith("knob")) {
+      toggleMute(id)
       return
     }
     console.info(`Button pressed: ${id}`)
@@ -52,11 +52,8 @@ device.on('down', ({ id }) => {
 
 // React to knob turns
 device.on('rotate', ({ id, delta }) => {
-    if (id == "knobTL") {
-      changeVolume(delta)
-      return
-    }
-    console.info(`Knob ${id} rotated: ${delta}`)
+    changeVolume(id, delta)
+    return
 })
 
 const establishConnection = async () => {
