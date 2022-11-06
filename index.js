@@ -28,12 +28,18 @@
 const {
     establishConnection,
     beforeExit,
-    ensureConnectionWorker,
 } = require('./device.js')
+
+const pactl = require("./src/pactl.js")
 
 process.on('SIGINT', async () => {
     console.log("SIGINT")
     await beforeExit()
     process.exit()
 });
-establishConnection()
+
+const start = async () => {
+    await pactl.init()
+    establishConnection()
+}
+start()

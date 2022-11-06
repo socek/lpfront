@@ -1,20 +1,11 @@
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const { device } = require("./const.js")
-
-const getVolume = async () => {
-    const { stdout, sterr } = await exec("amixer get Master")
-    for(let line of stdout.split("\n")) {
-        if(line.indexOf('Front Left:') != -1){
-            if(line.split(" ")[7] == "[off]")
-                return "----"
-            return line.split(" ")[6].replace("[", "").replace("]", "")
-        }
-    }
-}
+const { getSinkVolume, setSinkVolume, toggleMute } = require("./src/pactl.js")
+const { mainSinkName } = require("./src/settings.js")
 
 const updateVolume = async () => {
-    const volumeStr = await getVolume()
+    const volumeStr = getSinkVolume(mainSinkName)
     device.drawScreen("left", (ctx) => {
         ctx.font = "18px consolas";
         ctx.textBaselin = "middle";
@@ -23,15 +14,21 @@ const updateVolume = async () => {
     })
 }
 
-const toggleMute = async () => {
-  await exec("amixer set Master 1+ toggle")
-  updateVolume()
+const volumesToggleMute = async () => {
+    await toggleMute(mainSinkName)
+    updateVolume()
 }
 
 const changeVolume = async (volume) => {
-  volume = volume == 1 ? "5%+" : "5%-"
-  await exec(`/usr/bin/amixer set Master ${volume}`)
-  updateVolume()
+    await setSinkVolume(mainSinkName, volume == 1 ? "+5%" : "-5%")
+    updateVolume()
 }
 
-module.exports = { updateVolume, toggleMute, changeVolume }
+
+module.exports = {
+    updateVolume,
+    toggleMute,
+    changeVolume,
+    toggleMute: volumesToggleMute,
+}
+
