@@ -3,6 +3,7 @@ const exec = util.promisify(require('child_process').exec);
 const { device } = require("./const.js")
 const { getSinkVolume, setSinkVolume, toggleMute, getSinkInputVolume, setSinkInputVolume, toggleSinkInputMute } = require("./src/pactl.js")
 const { mainSinkName, chromiumSinkName, spotifySinkName } = require("./src/settings.js")
+const { Image } = require('canvas');
 
 const knobs = {
     knobTL: {
@@ -53,7 +54,6 @@ const changeVolume = async (knob, volume) => {
     }
     updateVolume()
 }
-
 
 module.exports = {
     updateVolume,
