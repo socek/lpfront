@@ -2,7 +2,7 @@ const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const { device } = require("./const.js")
 const { getSinkVolume, setSinkVolume, toggleMute, getSinkInputVolume, setSinkInputVolume, toggleSinkInputMute } = require("./src/pactl.js")
-const { mainSinkName, chromiumSinkName, spotifySinkName } = require("./src/settings.js")
+const { mainSinkName, chromiumSinkName, spotifySinkName, firefoxSinkName } = require("./src/settings.js")
 const { Image } = require('canvas');
 
 const knobs = {
@@ -20,7 +20,12 @@ const knobs = {
         name: chromiumSinkName,
         mute: toggleSinkInputMute,
         volume: setSinkInputVolume,
-    }
+    },
+    knobTR: {
+        name: firefoxSinkName,
+        mute: toggleSinkInputMute,
+        volume: setSinkInputVolume,
+    },
 }
 
 const updateVolume = async () => {
@@ -28,12 +33,23 @@ const updateVolume = async () => {
     const chromiumVolume = await getSinkInputVolume(chromiumSinkName)
     const spotifyVolume = await getSinkInputVolume(spotifySinkName)
     device.drawScreen("left", (ctx) => {
-        ctx.font = "18px consolas";
+        ctx.font = "12x consolas";
         ctx.textBaselin = "middle";
         ctx.fillStyle = "white";
-        ctx.fillText(mainVolume, 10 , 45)
-        ctx.fillText(spotifyVolume, 10, 135)
-        ctx.fillText(chromiumVolume, 10, 225)
+        ctx.textAlign = "center"
+        ctx.fillText(mainVolume + "\nMain", 30 , 45)
+        ctx.fillText(spotifyVolume + "\nSpotify", 30, 135)
+        ctx.fillText(chromiumVolume + "\nChrome", 30, 225)
+    })
+    const firefoxVolume = await getSinkInputVolume(firefoxSinkName)
+    device.drawScreen("right", (ctx) => {
+        ctx.font = "12x consolas";
+        ctx.textBaselin = "middle";
+        ctx.fillStyle = "white";
+        ctx.textAlign = "center"
+        ctx.fillText(firefoxVolume + "\nFirefox", 30 , 45)
+        // ctx.fillText(spotifyVolume + "\nSpotify", 30, 135)
+        // ctx.fillText(chromiumVolume + "\nChrome", 30, 225)
     })
 }
 

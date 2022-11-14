@@ -3,7 +3,8 @@ const exec = util.promisify(require('child_process').exec);
 
 const getSinks = async () => {
   const {stdout, stderr} = await exec("pactl -f json list sinks")
-    return JSON.parse(stdout)
+    const result = JSON.parse(stdout)
+    return result
 }
 
 const getSinkInputs = async () => {
@@ -33,13 +34,13 @@ const getSinkInputsByAppName = async (name) => {
 
 const getSinkVolume = async (name) => {
   const sink = await getSinkByName(name)
-  if(sink.mute) return "----"
+  if(!sink || sink.mute) return "----"
   return sink.volume["front-left"]["value_percent"]
 }
 
 const getSinkInputVolume = async (name) => {
   const sink = (await getSinkInputsByAppName(name))[0]
-  if(sink.mute) return "----"
+  if(!sink || sink.mute) return "----"
   return sink.volume["front-left"]["value_percent"]
 }
 
