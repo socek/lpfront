@@ -6,15 +6,13 @@ const { updateKey, hoverKey, downKey } = require("./src/drawer.js")
 const { previousSong, nextSong, playPause } = require("./src/spotify.js")
 const { goToWorkspace } = require("./src/i3.js")
 
-const { firstPage } = require("./configuration.js")
+const pages = require("./configuration.js")
 
 const STATES = {
   notConnected: 1,
   connecting: 2,
   connected: 3,
 }
-
-page = firstPage(device)
 
 let updateKnobsTask = null
 
@@ -40,11 +38,12 @@ device.on('connect', async () => {
     console.info('Connection successful!')
     state.connection = STATES.connected
     await device.setBrightness(1)
-    await page.drawAll()
-    await device.setButtonColor({ id : "1", color : "#0066ff" })
+    pages.init(device)
+    await pages.lightButtons()
+    await pages.drawPage()
     updateKnobsTask = setInterval(async() => {
-      await page.drawLeftScreen()
-      await page.drawRightScreen()
+      await pages.drawLeftScreen()
+      await pages.drawRightScreen()
     }, 1000)
 })
 
@@ -62,72 +61,30 @@ device.on('disconnect', (payload) => {
 
 device.on('down', async ({ id }) => {
     if(id.startsWith("knob")) {
-      await page.getKnobById(id).click()
-      await page.drawLeftScreen()
-      await page.drawRightScreen()
+      await pages.clickKnob(id)
       return
+    } else if (id == "circle") {
+      console.log("Live long and prosper")
+    } else {
+      await pages.changePage(id)
     }
-    console.info(`Button pressed: ${id}`)
 })
 
 device.on('rotate', async ({ id, delta }) => {
-    await page.getKnobById(id).change(delta)
-    await page.drawLeftScreen()
-    await page.drawRightScreen()
+    await pages.changeKnob(id, delta)
     return
 })
 
 device.on('touchstart', async (payload) => {
   const target = payload.changedTouches[0].target
   if( target.screen === "center" ) {
-    // await hoverKey(target.key)
-    page.hoverKey(target.key)
+    await pages.hoverKey(target.key)
   }
 })
 
 device.on('touchend', async (payload) => {
   const target = payload.changedTouches[0].target
-  page.drawKey(target.key)
-  page.click(target.key)
-  // downKey(target.key)
-  // updateKey()
-  // if (target.key == 0 ) {
-  //   await previousSong()
-  //   return
-  // }
-  // if (target.key == 1 ) {
-  //   await playPause()
-  //   return
-  // }
-  // if (target.key == 2 ) {
-  //   await nextSong()
-  //   return
-  // }
-  // if (target.key == 4) {
-  //   await goToWorkspace("w")
-  //   return
-  // }
-  // if (target.key == 5) {
-  //   await goToWorkspace("s")
-  //   return
-  // }
-  // if (target.key == 6) {
-  //   await goToWorkspace("c")
-  //   return
-  // }
-  // if (target.key == 7) {
-  //   await goToWorkspace("q")
-  //   return
-  // }
-  // if (target.key == 8) {
-  //   await goToWorkspace("a")
-  //   return
-  // }
-  // if (target.key == 9) {
-  //   await goToWorkspace("e")
-  //   return
-  // }
-  // console.info(`Screen pressed: ${target.key || target.screen}`)
+  await pages.touchEnd(target.key)
 })
 
 const establishConnection = async () => {

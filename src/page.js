@@ -11,11 +11,15 @@ const knobsTranslator = {
   "knobCR": 4,
   "knobBR": 5,
 }
-function Page(device, index) {
-  this.device = device
+function Page(index) {
+  this.device = null
   this.index = index
   this.keys = {}
   this.knobs = {}
+
+  this.init = (device) => {
+    this.device = device
+  }
 
   this.addKey = (key) => {
     this.keys[key.index] = key
@@ -26,8 +30,14 @@ function Page(device, index) {
   }
 
   this.drawAll = async () => {
+    for (let index = 0 ; index < 12 ; index++) {
+      this.device.drawKey(index, (ctx) => {
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, 90, 90);
+      })
+    }
     for (const [index, key] of entries(this.keys)) {
-      device.drawKey(index, key.draw)
+      this.device.drawKey(index, key.draw)
     }
     await this.drawLeftScreen()
     await this.drawRightScreen()
@@ -52,7 +62,7 @@ function Page(device, index) {
     for(const knob of knobs) {
       await knob.updateText()
     }
-    device.drawScreen("left", (ctx) => {
+    this.device.drawScreen("left", (ctx) => {
       for(const knob of knobs) {
         knob.draw(ctx)
       }
@@ -78,7 +88,7 @@ function Page(device, index) {
     for(const knob of knobs) {
       await knob.updateText()
     }
-    device.drawScreen("right", (ctx) => {
+    this.device.drawScreen("right", (ctx) => {
       for(const knob of knobs) {
         knob.draw(ctx)
       }
@@ -143,11 +153,95 @@ function Knob(index, name, getKnobText, click, change, draw) {
   this.getKnobDrawCenter = () => 90 * (this.index < 3 ? this.index : this.index - 3) + 45
 
   this.updateText = async () => {
-    this._text = await this.getKnobText(this)
+    this._text = await this.getKnobText()
   }
 
   this.change = change || (async () => {})
   this.click = click || (async () => {})
 }
 
-module.exports = {Page, Key, Knob}
+function PageContainer() {
+  this.device = null
+  this.pages = {}
+  this.currentPage = 1
+
+  this.init = (device) => {
+    this.device = device
+    for( const [index, page] of entries(this.pages)) {
+      page.init(this.device)
+    }
+  }
+
+  this.addPage = (index, page) => {
+    this.pages[index] = page
+  }
+
+  this.drawPage = async () => {
+    const page = this.pages[this.currentPage]
+    await page.drawAll()
+  }
+
+  this.drawLeftScreen = async () => {
+    const page = this.pages[this.currentPage]
+    await page.drawLeftScreen()
+  }
+
+  this.drawRightScreen = async () => {
+    const page = this.pages[this.currentPage]
+    await page.drawRightScreen()
+  }
+
+  this.clickKnob = async (id) => {
+    const page = this.pages[this.currentPage]
+    const knob = page.getKnobById(id)
+    knob.click(knob)
+    await this.drawLeftScreen()
+    await this.drawRightScreen()
+  }
+
+  this.changeKnob = async (id, delta) => {
+    const page = this.pages[this.currentPage]
+    const knob = page.getKnobById(id)
+    knob.change(delta)
+    await this.drawLeftScreen()
+    await this.drawRightScreen()
+  }
+
+  this.hoverKey = async (index) => {
+    const page = this.pages[this.currentPage]
+    await page.hoverKey(index)
+  }
+
+  this.touchEnd = async (index) => {
+    const page = this.pages[this.currentPage]
+    page.drawKey(index)
+    page.click(index)
+  }
+
+  this.changePage = async (index) => {
+    if (!this.pages[index]) {
+      console.info(`Page ${index} not exists`)
+      return
+    }
+    this.currentPage = index
+    this.drawPage()
+    this.drawLeftScreen()
+    this.drawRightScreen()
+    this.lightButtons()
+  }
+
+  this.lightButtons = async () => {
+    for (let index = 1 ; index < 7 ; index++) {
+      const page = this.pages[index]
+      if(page && index == this.currentPage) {
+        this.device.setButtonColor({ id : `${index}`, color : "#0066ff" })
+      } else if(page) {
+        this.device.setButtonColor({ id : `${index}`, color : "#ff6600" })
+      } else {
+        this.device.setButtonColor({ id : `${index}`, color : "black" })
+      }
+    }
+  }
+}
+
+module.exports = {PageContainer, Page, Key, Knob}
