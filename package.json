@@ -10,7 +10,7 @@
     "sharp": "^0.31.2"
   },
   "scripts": {
-    "start": "node index.js",
+    "start": "node --trace-warnings index.js",
     "testme": "node src/page.js"
   }
 }

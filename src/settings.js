@@ -2,10 +2,14 @@ const mainSinkName = "alsa_output.usb-Creative_Technology_Ltd_Sound_BlasterX_G6_
 const chromiumSinkName = "Chromium"
 const spotifySinkName = "Spotify"
 const firefoxSinkName = "Firefox"
+const discordSourceName = "WEBRTC VoiceEngine"
+const chromiumSourceName = "Chromium input"
 
 module.exports = {
   mainSinkName,
   chromiumSinkName,
   spotifySinkName,
   firefoxSinkName,
+  discordSourceName,
+  chromiumSourceName,
 }

@@ -11,6 +11,7 @@ const knobsTranslator = {
   "knobCR": 4,
   "knobBR": 5,
 }
+
 function Page(index) {
   this.device = null
   this.index = index
@@ -29,15 +30,16 @@ function Page(index) {
     this.knobs[knob.index] = knob
   }
 
-  this.drawAll = async () => {
-    for (let index = 0 ; index < 12 ; index++) {
+  this.drawKeys = async() => {
+    for (let index = 0; index < 12; index++) {
       this.device.drawKey(index, (ctx) => {
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, 90, 90);
       })
     }
     for (const [index, key] of entries(this.keys)) {
-      this.device.drawKey(index, key.draw)
+      await key.updateText()
+      this.device.drawKey(index, key.hoverOff)
     }
     await this.drawLeftScreen()
     await this.drawRightScreen()
@@ -57,13 +59,13 @@ function Page(index) {
     return knobs
   }
 
-  this.drawLeftScreen = async () => {
+  this.drawLeftScreen = async() => {
     const knobs = this.getLeftKnobs()
-    for(const knob of knobs) {
+    for (const knob of knobs) {
       await knob.updateText()
     }
     this.device.drawScreen("left", (ctx) => {
-      for(const knob of knobs) {
+      for (const knob of knobs) {
         knob.draw(ctx)
       }
     })
@@ -83,33 +85,37 @@ function Page(index) {
     return knobs
   }
 
-  this.drawRightScreen = async () => {
+  this.drawRightScreen = async() => {
     const knobs = this.getRightKnobs()
-    for(const knob of knobs) {
+    for (const knob of knobs) {
       await knob.updateText()
     }
     this.device.drawScreen("right", (ctx) => {
-      for(const knob of knobs) {
+      for (const knob of knobs) {
         knob.draw(ctx)
       }
     })
   }
 
-  this.hoverKey = async (index) => {
-    if (this.keys[index]) {
-      this.device.drawKey(index, this.keys[index].hover)
+  this.hoverKey = async(index) => {
+    const key = this.keys[index]
+    if (key) {
+      this.device.drawKey(index, key.hover)
     }
   }
 
-  this.drawKey = async (index) => {
-    if (this.keys[index]) {
-      this.device.drawKey(index, this.keys[index].draw)
+  this.hoverOff = async(index) => {
+    const key = this.keys[index]
+    if (key) {
+      await key.updateText()
+      this.device.drawKey(index, key.hoverOff)
     }
   }
 
-  this.click = (index) => {
-    if (this.keys[index]) {
-      this.keys[index].click()
+  this.click = async (index) => {
+    const key = this.keys[index]
+    if (key) {
+      await key.click()
     }
   }
 
@@ -119,23 +125,35 @@ function Page(index) {
   }
 }
 
-function Key(index, text, click, draw) {
+function Key(index, name, click, draw, getButtonText) {
   this.index = index
-  this.text = text
-  this.draw = draw || ((ctx) => {
-    ctx.font = "14px consolas";
-    ctx.textBaselin = "middle";
-    ctx.fillStyle = "white";
+  this.name = name
+  this.background = "black"
+  this.draw = draw || ((ctx, forceBackground) => {
+    const background = forceBackground || this.background
+    if (background) {
+      ctx.fillStyle = background
+      ctx.fillRect(0, 0, 90, 90)
+    }
+    ctx.font = "14px consolas"
+    ctx.textBaselin = "middle"
+    ctx.fillStyle = "white"
     ctx.textAlign = "center"
-    ctx.fillText(this.text, canvases.key[0], canvases.key[1])
+    ctx.fillText(this._text, canvases.key[0], canvases.key[1])
   })
   this.hover = (ctx) => {
-    ctx.fillStyle = 'yellow'
-    ctx.fillRect(0, 0, 90, 90)
+    this.draw(ctx, "yellow")
+  }
+  this.hoverOff = (ctx) => {
     this.draw(ctx)
   }
+  this.getButtonText = getButtonText || (() => this.name)
 
   this.click = click || (() => {})
+
+  this.updateText = async() => {
+    this._text = await this.getButtonText()
+  }
 }
 
 function Knob(index, name, getKnobText, click, change, draw) {
@@ -146,18 +164,18 @@ function Knob(index, name, getKnobText, click, change, draw) {
     ctx.textBaselin = "middle";
     ctx.fillStyle = "white";
     ctx.textAlign = "center"
-    ctx.fillText(this._text, canvases.sides[0] , this.getKnobDrawCenter() )
+    ctx.fillText(this._text, canvases.sides[0], this.getKnobDrawCenter())
   })
   this.getKnobText = getKnobText || (() => this.name)
 
   this.getKnobDrawCenter = () => 90 * (this.index < 3 ? this.index : this.index - 3) + 45
 
-  this.updateText = async () => {
+  this.updateText = async() => {
     this._text = await this.getKnobText()
   }
 
-  this.change = change || (async () => {})
-  this.click = click || (async () => {})
+  this.change = change || (async() => {})
+  this.click = click || (async() => {})
 }
 
 function PageContainer() {
@@ -167,7 +185,7 @@ function PageContainer() {
 
   this.init = (device) => {
     this.device = device
-    for( const [index, page] of entries(this.pages)) {
+    for (const [index, page] of entries(this.pages)) {
       page.init(this.device)
     }
   }
@@ -176,22 +194,25 @@ function PageContainer() {
     this.pages[index] = page
   }
 
-  this.drawPage = async () => {
+  this.drawPage = async() => {
     const page = this.pages[this.currentPage]
-    await page.drawAll()
+    await page.drawKeys()
+    await page.drawLeftScreen()
+    await page.drawRightScreen()
+    await this.lightButtons()
   }
 
-  this.drawLeftScreen = async () => {
+  this.drawLeftScreen = async() => {
     const page = this.pages[this.currentPage]
     await page.drawLeftScreen()
   }
 
-  this.drawRightScreen = async () => {
+  this.drawRightScreen = async() => {
     const page = this.pages[this.currentPage]
     await page.drawRightScreen()
   }
 
-  this.clickKnob = async (id) => {
+  this.clickKnob = async(id) => {
     const page = this.pages[this.currentPage]
     const knob = page.getKnobById(id)
     knob.click(knob)
@@ -199,7 +220,7 @@ function PageContainer() {
     await this.drawRightScreen()
   }
 
-  this.changeKnob = async (id, delta) => {
+  this.changeKnob = async(id, delta) => {
     const page = this.pages[this.currentPage]
     const knob = page.getKnobById(id)
     knob.change(delta)
@@ -207,41 +228,52 @@ function PageContainer() {
     await this.drawRightScreen()
   }
 
-  this.hoverKey = async (index) => {
+  this.hoverKey = async(index) => {
     const page = this.pages[this.currentPage]
     await page.hoverKey(index)
   }
 
-  this.touchEnd = async (index) => {
+  this.touchEnd = async(index) => {
     const page = this.pages[this.currentPage]
-    page.drawKey(index)
-    page.click(index)
+    await page.click(index)
+    await page.hoverOff(index)
   }
 
-  this.changePage = async (index) => {
+  this.changePage = async(index) => {
     if (!this.pages[index]) {
       console.info(`Page ${index} not exists`)
       return
     }
     this.currentPage = index
     this.drawPage()
-    this.drawLeftScreen()
-    this.drawRightScreen()
-    this.lightButtons()
   }
 
-  this.lightButtons = async () => {
-    for (let index = 1 ; index < 7 ; index++) {
+  this.lightButtons = async() => {
+    for (let index = 1; index < 7; index++) {
       const page = this.pages[index]
-      if(page && index == this.currentPage) {
-        this.device.setButtonColor({ id : `${index}`, color : "#0066ff" })
-      } else if(page) {
-        this.device.setButtonColor({ id : `${index}`, color : "#ff6600" })
+      if (page && index == this.currentPage) {
+        this.device.setButtonColor({
+          id: `${index}`,
+          color: "#0066ff"
+        })
+      } else if (page) {
+        this.device.setButtonColor({
+          id: `${index}`,
+          color: "#ff6600"
+        })
       } else {
-        this.device.setButtonColor({ id : `${index}`, color : "black" })
+        this.device.setButtonColor({
+          id: `${index}`,
+          color: "black"
+        })
       }
     }
   }
 }
 
-module.exports = {PageContainer, Page, Key, Knob}
+module.exports = {
+  PageContainer,
+  Page,
+  Key,
+  Knob
+}

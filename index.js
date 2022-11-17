@@ -6,14 +6,33 @@ const {
 const pactl = require("./src/pactl.js")
 
 
-process.on('SIGINT', async () => {
+process.on('SIGINT', async() => {
     console.log("SIGINT")
-    await beforeExit()
+    beforeExit()
     process.exit()
 });
 
-const start = async () => {
+const start = async() => {
     establishConnection()
-    // console.log(await pactl.getSinkInputs())
 }
+
 start()
+const {
+    getSinks
+} = require("./src/pulseaudio.js")
+
+async function elo() {
+    sinks = await getSinks()
+    for (sink of sinks) {
+        if (sink.name == "Spotify") {
+            await sink.setVolume("+5%")
+        }
+    }
+    sinks = await getSinks()
+    for (sink of sinks) {
+        if (sink.name == "Spotify") {
+            console.log(sink.type, sink.name, sink.data.mute, sink.getVolumes())
+        }
+    }
+}
+// elo()
