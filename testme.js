@@ -1,12 +1,11 @@
-const {
-    getSinks,
-    isSinksEqual,
-} = require("./src/pulseaudio.js")
+import {
+    getSinks
+} from "./src/pulseaudio.js"
 
 
 const start = async() => {
     let sinks = await getSinks()
-    for(const sink of sinks) {
+    for (const sink of sinks) {
         console.log(sink.name, sink.type)
     }
     // let first = (await getSinks())[0]

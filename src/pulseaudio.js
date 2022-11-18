@@ -1,9 +1,11 @@
-const util = require("util")
-const exec = util.promisify(require("child_process").exec)
-const ent = Object.entries
-const {
+import util from "util"
+import cp from "child_process"
+import {
   cacheInvalidationTime
-} = require("../const.js")
+} from "../const.js"
+import lodash from 'lodash'
+const exec = util.promisify(cp.exec)
+const ent = Object.entries
 
 let cache = null
 let last_cache_refresh = null
@@ -11,9 +13,6 @@ const invalidateCache = () => {
   cache = null
   last_cache_refresh = null
 }
-const {
-  isEqual
-} = require('lodash');
 
 const isCacheExpired = () => {
   const now = Date.now()
@@ -91,7 +90,7 @@ class PASourceOutput extends PAItem {
   }
 }
 
-const getSinks = async(force) => {
+export const getSinks = async(force) => {
   if (!force && !isCacheExpired()) {
     return cache
   }
@@ -116,18 +115,24 @@ const getSinks = async(force) => {
   return items
 }
 
-const getSinkByName = async(name) => {
+export const getSinkByName = async(name, typename) => {
   const sinks = await getSinks()
   const results = []
   for (const paitem of sinks) {
     if (paitem.name === name) {
-      results.push(paitem)
+      if (typename) {
+        if (paitem.type === typename) {
+          results.push(paitem)
+        }
+      } else {
+        results.push(paitem)
+      }
     }
   }
   return results
 }
 
-const isSinksEqual = (left, right) => {
+export const isSinksEqual = (left, right) => {
   // Making copies of an object in JS is so unefficent
   left = JSON.parse(JSON.stringify(left))
   right = JSON.parse(JSON.stringify(left))
@@ -135,10 +140,4 @@ const isSinksEqual = (left, right) => {
   delete left.data.latency
   delete right.data.latency
   return isEqual(left, right)
-}
-
-module.exports = {
-  getSinks,
-  getSinkByName,
-  isSinksEqual,
 }

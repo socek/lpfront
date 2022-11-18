@@ -1,5 +1,6 @@
 const entries = Object.entries
-function PageContainer() {
+
+export default function PageContainer() {
   this.device = null
   this.pages = {}
   this.currentPage = 1
@@ -91,5 +92,3 @@ function PageContainer() {
     }
   }
 }
-
-module.exports = PageContainer

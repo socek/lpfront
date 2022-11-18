@@ -1,6 +1,6 @@
 const canvases = [90 / 2, 90 / 2]
 
-function Key(index, name, click, draw, getButtonText) {
+export default function Key(index, name, click, draw, getButtonText) {
   this.index = index
   this.name = name
   this.background = "black"
@@ -31,4 +31,3 @@ function Key(index, name, click, draw, getButtonText) {
   }
 }
 
-module.exports = Key

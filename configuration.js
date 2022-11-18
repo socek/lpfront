@@ -1,72 +1,51 @@
-const ent = Object.entries
-const Page = require('./src/page.js')
-const PageContainer = require('./src/page_container.js')
-const Key = require('./src/key.js')
-const Knob = require('./src/knob.js')
-const {
+import Page from './src/page.js'
+import PageContainer from './src/page_container.js'
+import Key from './src/key.js'
+import Knob from './src/knob.js'
+import {
   previousSong,
   nextSong,
   playPause
-} = require("./src/spotify.js")
-const {
+} from "./src/spotify.js"
+import {
   goToWorkspace
-} = require("./src/i3.js")
-const {
+} from "./src/i3.js"
+import {
   getSinkByName,
-} = require("./src/pulseaudio.js")
-const {
+} from "./src/pulseaudio.js"
+import {
   mainSinkName,
   chromiumSinkName,
   spotifySinkName,
   firefoxSinkName,
   discordSourceName,
   chromiumSourceName,
-} = require("./src/settings.js")
-const {
-  getSinkVolume,
-  setSinkVolume,
-  toggleMute,
-  getSinkInputVolume,
-  setSinkInputVolume,
-  toggleSinkInputMute,
-  toggleSourceOutputMute,
-  getSourceOutputsVolume,
-} = require("./src/pactl.js")
+} from "./src/settings.js"
+const entries = Object.entries
 
 const createSinkKnob = (index, name, sinkName) => {
   return new Knob(index, name, async function() {
     const sinks = await getSinkByName(sinkName)
     const name = `${this.name}\n`
-    for(const sink of sinks) {
+    for (const sink of sinks) {
       if (sink.data.mute) {
         return `${name}(mute)`
       }
-      for(const [key, volume] of ent(sink.data.volume)) {
+      for (const [key, volume] of entries(sink.data.volume)) {
         return `${name}${volume.value_percent}`
       }
     }
     return `${name}(off)`
   }, async() => {
     const sinks = await getSinkByName(sinkName)
-    for(const sink of sinks) {
+    for (const sink of sinks) {
       await sink.toggleMute()
     }
   }, async(delta) => {
     const sinks = await getSinkByName(sinkName)
-    for(const sink of sinks) {
+    for (const sink of sinks) {
       await sink.setVolume(delta == 1 ? "+5%" : "-5%")
     }
-  })
-}
-
-const createSinkInputKnob = (index, name, sinkName) => {
-  return new Knob(index, name, async function() {
-    const volume = await getSinkInputVolume(sinkName)
-    return this.name + "\n" + volume
-  }, async() => {
-    await toggleSinkInputMute(sinkName)
-  }, async(delta) => {
-    await setSinkInputVolume(sinkName, delta == 1 ? "+5%" : "-5%")
   })
 }
 
@@ -95,31 +74,47 @@ const firstPage = () => {
   }))
 
   page.addKey(new Key(10, "Chrome\nMic", async function() {
-    await toggleSourceOutputMute(chromiumSourceName)
+    const sinks = await getSinkByName(chromiumSourceName)
+    for (const sink of sinks) {
+      sink.toggleMute()
+    }
     await this.updateText()
   }, null, async function() {
-    const volume = await getSourceOutputsVolume(chromiumSourceName)
-    if (["(muted)", "----"].includes(volume)) {
-      this.background = "red"
+    const sinks = await getSinkByName(chromiumSourceName)
+    if (sinks.length == 0) {
+      this.background = "yellow"
       return `${this.name}\nOff`
-    } else {
-      this.background = "black"
-      return `${this.name}\nOn`
     }
+    for (const sink of sinks) {
+      if (sink.mute) {
+        this.background = "red"
+        return `${this.name}\nMuted`
+      }
+    }
+    this.background = "green"
+    return `${this.name}\nOn`
   }))
 
   page.addKey(new Key(11, "Discord\nMic", async function() {
-    await toggleSourceOutputMute(discordSourceName)
+    const sinks = await getSinkByName(discordSourceName, "Source Output")
+    for (const sink of sinks) {
+      sink.toggleMute()
+    }
     await this.updateText()
   }, null, async function() {
-    const volume = await getSourceOutputsVolume(discordSourceName)
-    if (["(muted)", "----"].includes(volume)) {
-      this.background = "red"
+    const sinks = await getSinkByName(discordSourceName, "Source Output")
+    if (sinks.length == 0) {
+      this.background = "yellow"
       return `${this.name}\nOff`
-    } else {
-      this.background = "black"
-      return `${this.name}\nOn`
     }
+    for (const sink of sinks) {
+      if (sink.data.mute) {
+        this.background = "red"
+        return `${this.name}\nMuted`
+      }
+    }
+    this.background = "green"
+    return `${this.name}\nOn`
   }))
 
   page.addKnob(createSinkKnob(0, "Master", mainSinkName))
@@ -133,5 +128,4 @@ const firstPage = () => {
 
 const pageContainer = new PageContainer()
 pageContainer.addPage(1, firstPage())
-
-module.exports = pageContainer
+export default pageContainer;

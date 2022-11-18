@@ -1,7 +1,7 @@
-const { sleep } = require("./utils.js")
-const { device } = require("./const.js")
+import { sleep } from "./utils.js"
+import { device } from "./const.js"
 
-const pages = require("./configuration.js")
+import pages from "./configuration.js"
 
 const STATES = {
   notConnected: 1,
@@ -82,23 +82,17 @@ device.on('touchend', async (payload) => {
   await pages.touchEnd(target.key)
 })
 
-const establishConnection = async () => {
+export const establishConnection = async () => {
   console.log("Starting connection...")
   state.connection = STATES.connecting
   ensureConnectionWorker()
   device.connect()
 }
 
-const beforeExit = async () => {
+export const beforeExit = async () => {
   if(state.connection == STATES.connected) {
       await device.setBrightness(0.1)
       await device.close()
   }
 }
 
-module.exports = {
-  device,
-  establishConnection,
-  beforeExit,
-  ensureConnectionWorker,
- }

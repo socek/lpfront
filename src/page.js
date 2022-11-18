@@ -8,7 +8,7 @@ const knobsTranslator = {
   "knobBR": 5,
 }
 
-function Page(index) {
+export default function Page(index) {
   this.device = null
   this.index = index
   this.keys = {}
@@ -120,5 +120,3 @@ function Page(index) {
     return this.knobs[index]
   }
 }
-
-module.exports = Page

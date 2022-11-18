@@ -1,7 +1,7 @@
-const {
+import {
     establishConnection,
     beforeExit,
-} = require('./device.js')
+} from './device.js'
 
 process.on('SIGINT', async() => {
     console.log("SIGINT")

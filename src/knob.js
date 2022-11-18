@@ -1,6 +1,6 @@
 const canvases = [60 / 2, 270 / 3 / 2]
 
-function Knob(index, name, getKnobText, click, change, draw) {
+export default function Knob(index, name, getKnobText, click, change, draw) {
   this.index = index
   this.name = name
   this.draw = draw || ((ctx) => {
@@ -21,5 +21,3 @@ function Knob(index, name, getKnobText, click, change, draw) {
   this.change = change || (async() => {})
   this.click = click || (async() => {})
 }
-
-module.exports = Knob
