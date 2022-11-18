@@ -37,7 +37,7 @@ export default function PageContainer() {
   this.clickKnob = async(id) => {
     const page = this.pages[this.currentPage]
     const knob = page.getKnobById(id)
-    knob.click(knob)
+    knob.onClick(knob)
     await this.drawLeftScreen()
     await this.drawRightScreen()
   }
@@ -45,7 +45,7 @@ export default function PageContainer() {
   this.changeKnob = async(id, delta) => {
     const page = this.pages[this.currentPage]
     const knob = page.getKnobById(id)
-    knob.change(delta)
+    knob.onChange(delta)
     await this.drawLeftScreen()
     await this.drawRightScreen()
   }

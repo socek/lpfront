@@ -24,91 +24,51 @@ import {
 const entries = Object.entries
 
 const createSinkKnob = (index, name, sinkName) => {
-  const options = {
-    name,
-    getKnobText: async function() {
-      const sinks = await getSinkByName(sinkName)
-      const name = `${this.name}\n`
-      for (const sink of sinks) {
-        if (sink.data.mute) {
-          return `${name}(mute)`
-        }
-        for (const [key, volume] of entries(sink.data.volume)) {
-          return `${name}${volume.value_percent}`
-        }
+  const getText = async function() {
+    const sinks = await getSinkByName(sinkName)
+    const name = `${this.name}\n`
+    for (const sink of sinks) {
+      if (sink.data.mute) {
+        return `${name}(mute)`
       }
-      return `${name}(off)`
-    },
-    click: async() => {
-      const sinks = await getSinkByName(sinkName)
-      for (const sink of sinks) {
-        await sink.toggleMute()
+      for (const [key, volume] of entries(sink.data.volume)) {
+        return `${name}${volume.value_percent}`
       }
-    },
-    change: async(delta) => {
-      const sinks = await getSinkByName(sinkName)
-      for (const sink of sinks) {
-        await sink.setVolume(delta == 1 ? "+5%" : "-5%")
-      }
+    }
+    return `${name}(off)`
+  }
+
+  const onClick = async() => {
+    const sinks = await getSinkByName(sinkName)
+    for (const sink of sinks) {
+      await sink.toggleMute()
     }
   }
-  return new Knob(index, options)
+  const onChange = async(delta) => {
+    const sinks = await getSinkByName(sinkName)
+    for (const sink of sinks) {
+      await sink.setVolume(delta == 1 ? "+5%" : "-5%")
+    }
+  }
+  return new Knob(index, {
+    name,
+    getText,
+    onClick,
+    onChange
+  })
 }
 
-const firstPage = () => {
-  const page = new Page(1)
-  page.addKey(new Key(0, "Previous", previousSong))
-  page.addKey(new Key(1, "Play", playPause))
-  page.addKey(new Key(2, "Next", nextSong))
-  page.addKey(new Key(4, "Firefox", () => {
-    goToWorkspace("w")
-  }))
-  page.addKey(new Key(5, "Chrome", () => {
-    goToWorkspace("s")
-  }))
-  page.addKey(new Key(6, "OBS", () => {
-    goToWorkspace("c")
-  }))
-  page.addKey(new Key(7, "ST", () => {
-    goToWorkspace("q")
-  }))
-  page.addKey(new Key(8, "Spotify", () => {
-    goToWorkspace("a")
-  }))
-  page.addKey(new Key(9, "Slack", () => {
-    goToWorkspace("e")
-  }))
-
-  page.addKey(new Key(10, "Chrome\nMic", async function() {
-    const sinks = await getSinkByName(chromiumSourceName)
+const createMicButton = (index, name, sinkName) => {
+  async function onClick() {
+    const sinks = await getSinkByName(sinkName)
     for (const sink of sinks) {
       sink.toggleMute()
     }
     await this.updateText()
-  }, null, async function() {
-    const sinks = await getSinkByName(chromiumSourceName)
-    if (sinks.length == 0) {
-      this.background = "yellow"
-      return `${this.name}\nOff`
-    }
-    for (const sink of sinks) {
-      if (sink.mute) {
-        this.background = "red"
-        return `${this.name}\nMuted`
-      }
-    }
-    this.background = "green"
-    return `${this.name}\nOn`
-  }))
+  }
 
-  page.addKey(new Key(11, "Discord\nMic", async function() {
-    const sinks = await getSinkByName(discordSourceName, "Source Output")
-    for (const sink of sinks) {
-      sink.toggleMute()
-    }
-    await this.updateText()
-  }, null, async function() {
-    const sinks = await getSinkByName(discordSourceName, "Source Output")
+  async function getText() {
+    const sinks = await getSinkByName(sinkName, "Source Output")
     if (sinks.length == 0) {
       this.background = "yellow"
       return `${this.name}\nOff`
@@ -121,7 +81,64 @@ const firstPage = () => {
     }
     this.background = "green"
     return `${this.name}\nOn`
+  }
+
+  return new Key(index, {name, onClick, getText})
+}
+
+const firstPage = () => {
+  const page = new Page(1)
+  page.addKey(new Key(0, {
+    name: "Previous",
+    onClick: previousSong
   }))
+  page.addKey(new Key(1, {
+    name: "Play",
+    onClick: playPause
+  }))
+  page.addKey(new Key(2, {
+    name: "Next",
+    onClick: nextSong
+  }))
+  page.addKey(new Key(4, {
+    name: "Firefox",
+    onClick: () => {
+      goToWorkspace("w")
+    }
+  }))
+  page.addKey(new Key(5, {
+    name: "Chrome",
+    onClick: () => {
+      goToWorkspace("s")
+    }
+  }))
+  page.addKey(new Key(6, {
+    name: "OBS",
+    onClick: () => {
+      goToWorkspace("c")
+    }
+  }))
+  page.addKey(new Key(7, {
+    name: "ST",
+    onClick: () => {
+      goToWorkspace("q")
+    }
+  }))
+  page.addKey(new Key(8, {
+    name: "Spotify",
+    onClick: () => {
+      goToWorkspace("a")
+    }
+  }))
+  page.addKey(new Key(9, {
+    name: "Slack",
+    onClick: () => {
+      goToWorkspace("e")
+    }
+  }))
+
+  page.addKey(createMicButton(10, "Chrome\nMic", chromiumSourceName))
+  page.addKey(createMicButton(11, "Discord\nMic", discordSourceName))
 
   page.addKnob(createSinkKnob(0, "Master", mainSinkName))
   page.addKnob(createSinkKnob(1, "Spotify", spotifySinkName))

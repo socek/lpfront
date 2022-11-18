@@ -27,15 +27,9 @@ export default function Page(index) {
   }
 
   this.drawKeys = async() => {
-    for (let index = 0; index < 12; index++) {
-      this.device.drawKey(index, (ctx) => {
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, 90, 90);
-      })
-    }
     for (const [index, key] of entries(this.keys)) {
       await key.updateText()
-      this.device.drawKey(index, key.hoverOff)
+      this.device.drawKey(index, key.hoverOff.bind(key))
     }
     await this.drawLeftScreen()
     await this.drawRightScreen()
@@ -96,7 +90,7 @@ export default function Page(index) {
   this.hoverKey = async(index) => {
     const key = this.keys[index]
     if (key) {
-      this.device.drawKey(index, key.hover)
+      this.device.drawKey(index, key.hover.bind(key))
     }
   }
 
@@ -104,14 +98,14 @@ export default function Page(index) {
     const key = this.keys[index]
     if (key) {
       await key.updateText()
-      this.device.drawKey(index, key.hoverOff)
+      this.device.drawKey(index, key.hoverOff.bind(key))
     }
   }
 
   this.click = async(index) => {
     const key = this.keys[index]
     if (key) {
-      await key.click()
+      await key.onClick()
     }
   }
 

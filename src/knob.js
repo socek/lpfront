@@ -3,10 +3,10 @@ const canvases = [60 / 2, 270 / 3 / 2]
 export default class Knob {
   constructor(index, {
     name,
-    getKnobText,
-    click,
-    change,
-    draw
+    getText,
+    onClick,
+    onChange,
+    draw,
   }) {
     this.index = index
     this.name = name
@@ -17,10 +17,10 @@ export default class Knob {
       ctx.textAlign = "center"
       ctx.fillText(this._text, canvases[0], this.getKnobDrawCenter(ctx))
     })
-    this.getKnobText = getKnobText || (() => this.name)
+    this.getText = getText || (() => this.name)
 
-    this.change = change || (async() => {})
-    this.click = click || (async() => {})
+    this.onChange = onChange || (async() => {})
+    this.onClick = onClick || (async() => {})
   }
 
   getKnobDrawCenter(ctx) {
@@ -30,7 +30,7 @@ export default class Knob {
   }
 
   async updateText() {
-    this._text = await this.getKnobText()
+    this._text = await this.getText()
   }
 
 }
