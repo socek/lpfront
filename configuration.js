@@ -24,29 +24,35 @@ import {
 const entries = Object.entries
 
 const createSinkKnob = (index, name, sinkName) => {
-  return new Knob(index, name, async function() {
-    const sinks = await getSinkByName(sinkName)
-    const name = `${this.name}\n`
-    for (const sink of sinks) {
-      if (sink.data.mute) {
-        return `${name}(mute)`
+  const options = {
+    name,
+    getKnobText: async function() {
+      const sinks = await getSinkByName(sinkName)
+      const name = `${this.name}\n`
+      for (const sink of sinks) {
+        if (sink.data.mute) {
+          return `${name}(mute)`
+        }
+        for (const [key, volume] of entries(sink.data.volume)) {
+          return `${name}${volume.value_percent}`
+        }
       }
-      for (const [key, volume] of entries(sink.data.volume)) {
-        return `${name}${volume.value_percent}`
+      return `${name}(off)`
+    },
+    click: async() => {
+      const sinks = await getSinkByName(sinkName)
+      for (const sink of sinks) {
+        await sink.toggleMute()
+      }
+    },
+    change: async(delta) => {
+      const sinks = await getSinkByName(sinkName)
+      for (const sink of sinks) {
+        await sink.setVolume(delta == 1 ? "+5%" : "-5%")
       }
     }
-    return `${name}(off)`
-  }, async() => {
-    const sinks = await getSinkByName(sinkName)
-    for (const sink of sinks) {
-      await sink.toggleMute()
-    }
-  }, async(delta) => {
-    const sinks = await getSinkByName(sinkName)
-    for (const sink of sinks) {
-      await sink.setVolume(delta == 1 ? "+5%" : "-5%")
-    }
-  })
+  }
+  return new Knob(index, options)
 }
 
 const firstPage = () => {
