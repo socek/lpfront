@@ -1,10 +1,5 @@
-const { HAPTIC } = require('loupedeck')
 const { sleep } = require("./utils.js")
 const { device } = require("./const.js")
-const { updateVolume, toggleMute, changeVolume } = require("./volumes.js")
-const { updateKey, hoverKey, downKey } = require("./src/drawer.js")
-const { previousSong, nextSong, playPause } = require("./src/spotify.js")
-const { goToWorkspace } = require("./src/i3.js")
 
 const pages = require("./configuration.js")
 
@@ -44,7 +39,7 @@ device.on('connect', async () => {
     updateKnobsTask = setInterval(async() => {
       await pages.drawLeftScreen()
       await pages.drawRightScreen()
-    }, 1000)
+    }, 100)
 })
 
 device.on('disconnect', (payload) => {

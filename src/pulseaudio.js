@@ -11,9 +11,12 @@ const invalidateCache = () => {
   cache = null
   last_cache_refresh = null
 }
+const {
+  isEqual
+} = require('lodash');
+
 const isCacheExpired = () => {
   const now = Date.now()
-  console.log("checking", last_cache_refresh)
   return !last_cache_refresh || last_cache_refresh + cacheInvalidationTime > now
 }
 
@@ -30,16 +33,12 @@ class PAItem {
     this.name = data.description
   }
 
-  getVolumes() {
+  getVolume() {
     if (sink.mute) return null
-    const volumes = []
     for (const [name, volume] of ent(this.data.volume)) {
-      volumes.push({
-        name: name,
-        volume: volume.value_percent,
-      })
+      return volume.value_percent
     }
-    return volumes
+    return null
   }
 
   async setVolume(volume) {
@@ -47,6 +46,7 @@ class PAItem {
     await exec(cmd)
     invalidateCache()
   }
+
   async toggleMute() {
     const cmd = `pactl ${this.commands.mute} ${this.data.index} toggle`
     await exec(cmd)
@@ -87,6 +87,7 @@ class PASourceOutput extends PAItem {
   constructor(data) {
     super(data)
     this.type = "Source Output"
+    this.name = data.properties["application.name"]
   }
 }
 
@@ -98,9 +99,9 @@ const getSinks = async(force) => {
     stdout,
     stderr
   } = await exec("pactl -f json list")
-  const items = []
   const result = JSON.parse(stdout)
 
+  const items = []
   for (const element of result["sinks"]) {
     items.push(new PASink(element))
   }
@@ -115,6 +116,29 @@ const getSinks = async(force) => {
   return items
 }
 
+const getSinkByName = async(name) => {
+  const sinks = await getSinks()
+  const results = []
+  for (const paitem of sinks) {
+    if (paitem.name === name) {
+      results.push(paitem)
+    }
+  }
+  return results
+}
+
+const isSinksEqual = (left, right) => {
+  // Making copies of an object in JS is so unefficent
+  left = JSON.parse(JSON.stringify(left))
+  right = JSON.parse(JSON.stringify(left))
+    // Latency is a very dynamicly change value
+  delete left.data.latency
+  delete right.data.latency
+  return isEqual(left, right)
+}
+
 module.exports = {
   getSinks,
+  getSinkByName,
+  isSinksEqual,
 }

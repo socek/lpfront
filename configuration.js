@@ -1,9 +1,8 @@
-const {
-  PageContainer,
-  Page,
-  Key,
-  Knob
-} = require('./src/page.js')
+const ent = Object.entries
+const Page = require('./src/page.js')
+const PageContainer = require('./src/page_container.js')
+const Key = require('./src/key.js')
+const Knob = require('./src/knob.js')
 const {
   previousSong,
   nextSong,
@@ -12,6 +11,17 @@ const {
 const {
   goToWorkspace
 } = require("./src/i3.js")
+const {
+  getSinkByName,
+} = require("./src/pulseaudio.js")
+const {
+  mainSinkName,
+  chromiumSinkName,
+  spotifySinkName,
+  firefoxSinkName,
+  discordSourceName,
+  chromiumSourceName,
+} = require("./src/settings.js")
 const {
   getSinkVolume,
   setSinkVolume,
@@ -22,23 +32,30 @@ const {
   toggleSourceOutputMute,
   getSourceOutputsVolume,
 } = require("./src/pactl.js")
-const {
-  mainSinkName,
-  chromiumSinkName,
-  spotifySinkName,
-  firefoxSinkName,
-  discordSourceName,
-  chromiumSourceName,
-} = require("./src/settings.js")
 
 const createSinkKnob = (index, name, sinkName) => {
   return new Knob(index, name, async function() {
-    const volume = await getSinkVolume(sinkName)
-    return this.name + "\n" + volume
+    const sinks = await getSinkByName(sinkName)
+    const name = `${this.name}\n`
+    for(const sink of sinks) {
+      if (sink.data.mute) {
+        return `${name}(mute)`
+      }
+      for(const [key, volume] of ent(sink.data.volume)) {
+        return `${name}${volume.value_percent}`
+      }
+    }
+    return `${name}(off)`
   }, async() => {
-    await toggleMute(sinkName)
+    const sinks = await getSinkByName(sinkName)
+    for(const sink of sinks) {
+      await sink.toggleMute()
+    }
   }, async(delta) => {
-    await setSinkVolume(sinkName, delta == 1 ? "+5%" : "-5%")
+    const sinks = await getSinkByName(sinkName)
+    for(const sink of sinks) {
+      await sink.setVolume(delta == 1 ? "+5%" : "-5%")
+    }
   })
 }
 
@@ -106,10 +123,10 @@ const firstPage = () => {
   }))
 
   page.addKnob(createSinkKnob(0, "Master", mainSinkName))
-  page.addKnob(createSinkInputKnob(1, "Spotify", spotifySinkName))
-  page.addKnob(createSinkInputKnob(2, "Chrome", chromiumSinkName))
-  page.addKnob(createSinkInputKnob(3, "Firefox", firefoxSinkName))
-  page.addKnob(createSinkInputKnob(4, "Discord", discordSourceName))
+  page.addKnob(createSinkKnob(1, "Spotify", spotifySinkName))
+  page.addKnob(createSinkKnob(2, "Chrome", chromiumSinkName))
+  page.addKnob(createSinkKnob(3, "Firefox", firefoxSinkName))
+  page.addKnob(createSinkKnob(4, "Discord", discordSourceName))
 
   return page
 }

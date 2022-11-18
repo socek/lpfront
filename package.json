@@ -6,11 +6,12 @@
   "license": "MIT",
   "dependencies": {
     "canvas": "^2.10.2",
+    "lodash": "^4.17.21",
     "loupedeck": "^3.2.0",
     "sharp": "^0.31.2"
   },
   "scripts": {
     "start": "node --trace-warnings index.js",
-    "testme": "node src/page.js"
+    "testme": "node --trace-warnings testme.js"
   }
 }
