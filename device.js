@@ -89,9 +89,12 @@ export const establishConnection = async () => {
 }
 
 export const beforeExit = async () => {
+  console.log("beforeExit")
   if(state.connection == STATES.connected) {
+      console.log("ending...")
       await device.setBrightness(0.1)
       await device.close()
+      console.log("closed")
   }
 }
 

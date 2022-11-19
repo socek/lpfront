@@ -21,7 +21,11 @@ import {
   discordSourceName,
   chromiumSourceName,
 } from "./src/settings.js"
+import {
+  sessionBus,
+} from 'dbus-next'
 const entries = Object.entries
+const dbus = sessionBus()
 
 const createSinkKnob = (index, name, sinkName) => {
   const getText = async function() {
@@ -98,7 +102,27 @@ const createMicButton = (index, name, sinkName) => {
 
 const playPauseButton = (index) => {
   const name = 'Play/Pause'
-  return new Key(index, {name, onClick: playPause})
+  async function updateData() {
+    const proxy = await dbus.getProxyObject('org.mpris.MediaPlayer2.spotify', '/org/mpris/MediaPlayer2');
+    const player = proxy.getInterface('org.freedesktop.DBus.Properties')
+    const properties = await player.Get("org.mpris.MediaPlayer2.Player", "PlaybackStatus")
+    if (properties.value === "Playing") {
+      this.background = "green"
+      return {
+        "text": "Pause"
+      }
+    } else {
+      this.background = "grey"
+      return {
+        "text": "Play"
+      }
+    }
+  }
+  return new Key(index, {
+    name,
+    onClick: playPause,
+    updateData,
+  })
 }
 
 const firstPage = () => {
