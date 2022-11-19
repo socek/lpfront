@@ -64,26 +64,41 @@ const createMicButton = (index, name, sinkName) => {
     for (const sink of sinks) {
       sink.toggleMute()
     }
-    await this.updateText()
+    this.refresh()
   }
 
-  async function getText() {
+  async function updateData() {
     const sinks = await getSinkByName(sinkName, "Source Output")
     if (sinks.length == 0) {
-      this.background = "yellow"
-      return `${this.name}\nOff`
+      this.background = "grey"
+      return {
+        "text": `${this.name}\nOff`
+      }
     }
     for (const sink of sinks) {
       if (sink.data.mute) {
         this.background = "red"
-        return `${this.name}\nMuted`
+        return {
+          "text": `${this.name}\nMuted`
+        }
       }
     }
     this.background = "green"
-    return `${this.name}\nOn`
+    return {
+      "text": `${this.name}\nOn`
+    }
   }
 
-  return new Key(index, {name, onClick, getText})
+  return new Key(index, {
+    name,
+    onClick,
+    updateData
+  })
+}
+
+const playPauseButton = (index) => {
+  const name = 'Play/Pause'
+  return new Key(index, {name, onClick: playPause})
 }
 
 const firstPage = () => {
@@ -92,10 +107,7 @@ const firstPage = () => {
     name: "Previous",
     onClick: previousSong
   }))
-  page.addKey(new Key(1, {
-    name: "Play",
-    onClick: playPause
-  }))
+  page.addKey(playPauseButton(1))
   page.addKey(new Key(2, {
     name: "Next",
     onClick: nextSong

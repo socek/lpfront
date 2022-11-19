@@ -16,38 +16,23 @@ export default function PageContainer() {
     this.pages[index] = page
   }
 
-  this.drawPage = async() => {
+  this.refreshPage = async() => {
     const page = this.pages[this.currentPage]
-    await page.drawKeys()
-    await page.drawLeftScreen()
-    await page.drawRightScreen()
-    await this.lightButtons()
-  }
-
-  this.drawLeftScreen = async() => {
-    const page = this.pages[this.currentPage]
-    await page.drawLeftScreen()
-  }
-
-  this.drawRightScreen = async() => {
-    const page = this.pages[this.currentPage]
-    await page.drawRightScreen()
+    await page.refreshPage()
   }
 
   this.clickKnob = async(id) => {
     const page = this.pages[this.currentPage]
     const knob = page.getKnobById(id)
     knob.onClick(knob)
-    await this.drawLeftScreen()
-    await this.drawRightScreen()
+    await page.refreshPage()
   }
 
   this.changeKnob = async(id, delta) => {
     const page = this.pages[this.currentPage]
     const knob = page.getKnobById(id)
     knob.onChange(delta)
-    await this.drawLeftScreen()
-    await this.drawRightScreen()
+    await page.refreshPage()
   }
 
   this.hoverKey = async(index) => {
@@ -67,7 +52,8 @@ export default function PageContainer() {
       return
     }
     this.currentPage = index
-    this.drawPage()
+    await this.refreshPage()
+    await this.lightButtons()
   }
 
   this.lightButtons = async() => {

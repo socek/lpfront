@@ -35,10 +35,9 @@ device.on('connect', async () => {
     await device.setBrightness(1)
     pages.init(device)
     await pages.lightButtons()
-    await pages.drawPage()
+    await pages.refreshPage()
     updateKnobsTask = setInterval(async() => {
-      await pages.drawLeftScreen()
-      await pages.drawRightScreen()
+      await pages.refreshPage()
     }, 100)
 })
 

@@ -16,20 +16,25 @@ export default function Page(index) {
 
   this.init = (device) => {
     this.device = device
+    for(const [index, key] of entries(this.keys)) {
+      key.setDevice(device)
+    }
   }
 
   this.addKey = (key) => {
     this.keys[key.index] = key
+    if(this.device) {
+      key.setDevice(device)
+    }
   }
 
   this.addKnob = (knob) => {
     this.knobs[knob.index] = knob
   }
 
-  this.drawKeys = async() => {
+  this.refreshPage = async() => {
     for (const [index, key] of entries(this.keys)) {
-      await key.updateText()
-      this.device.drawKey(index, key.hoverOff.bind(key))
+      await key.refresh()
     }
     await this.drawLeftScreen()
     await this.drawRightScreen()
@@ -90,15 +95,14 @@ export default function Page(index) {
   this.hoverKey = async(index) => {
     const key = this.keys[index]
     if (key) {
-      this.device.drawKey(index, key.hover.bind(key))
+      await key.onHover()
     }
   }
 
   this.hoverOff = async(index) => {
     const key = this.keys[index]
     if (key) {
-      await key.updateText()
-      this.device.drawKey(index, key.hoverOff.bind(key))
+      await key.onHoverOff()
     }
   }
 

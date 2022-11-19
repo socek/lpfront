@@ -5,7 +5,7 @@ import {
 
 process.on('SIGINT', async() => {
     console.log("SIGINT")
-    beforeExit()
+    await beforeExit()
     process.exit()
 });
 

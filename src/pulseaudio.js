@@ -3,7 +3,7 @@ import cp from "child_process"
 import {
   cacheInvalidationTime
 } from "../const.js"
-import lodash from 'lodash'
+import _ from 'lodash'
 const exec = util.promisify(cp.exec)
 const ent = Object.entries
 
@@ -16,7 +16,7 @@ const invalidateCache = () => {
 
 const isCacheExpired = () => {
   const now = Date.now()
-  return !last_cache_refresh || last_cache_refresh + cacheInvalidationTime > now
+  return !last_cache_refresh || (now - (last_cache_refresh + cacheInvalidationTime)) > 0
 }
 
 class PAItem {
@@ -139,5 +139,5 @@ export const isSinksEqual = (left, right) => {
     // Latency is a very dynamicly change value
   delete left.data.latency
   delete right.data.latency
-  return isEqual(left, right)
+  return _.isEqual(left, right)
 }
