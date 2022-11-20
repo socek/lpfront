@@ -1,6 +1,7 @@
 import {
     getSinks
 } from "./src/pulseaudio.js"
+import Key from "./src/key.js"
 
 import _ from 'lodash'
 

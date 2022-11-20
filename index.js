@@ -3,11 +3,13 @@ import {
     beforeExit,
 } from './device.js'
 
-process.on('SIGINT', async() => {
-    console.log("SIGINT")
+const cleanExit = async function() {
+    console.log("\rExiting...")
     await beforeExit()
     process.exit()
-});
+};
+process.on('SIGINT', cleanExit); // catch ctrl-c
+process.on('SIGTERM', cleanExit); // catch kill
 
 const start = async() => {
     establishConnection()

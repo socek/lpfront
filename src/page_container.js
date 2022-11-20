@@ -5,10 +5,10 @@ export default function PageContainer() {
   this.pages = {}
   this.currentPage = 1
 
-  this.init = (device) => {
+  this.init = async (device) => {
     this.device = device
     for (const [index, page] of entries(this.pages)) {
-      page.init(this.device)
+      await page.init(this.device)
     }
   }
 

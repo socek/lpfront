@@ -7,6 +7,10 @@ const knobsTranslator = {
   "knobCR": 4,
   "knobBR": 5,
 }
+const screenKnobs = {
+  'left': [0, 1, 2],
+  'right': [3, 4, 5],
+}
 
 export default function Page(index) {
   this.device = null
@@ -14,82 +18,52 @@ export default function Page(index) {
   this.keys = {}
   this.knobs = {}
 
-  this.init = (device) => {
+  this.init = async(device) => {
     this.device = device
-    for(const [index, key] of entries(this.keys)) {
+    for (const [index, key] of entries(this.keys)) {
       key.setDevice(device)
+    }
+    for (const [index, knob] of entries(this.knobs)) {
+      knob.setDevice(device)
     }
   }
 
   this.addKey = (key) => {
     this.keys[key.index] = key
-    if(this.device) {
+    if (this.device) {
       key.setDevice(device)
     }
   }
 
   this.addKnob = (knob) => {
     this.knobs[knob.index] = knob
+    if (this.device) {
+      knob.setDevice(device)
+    }
   }
 
   this.refreshPage = async() => {
     for (const [index, key] of entries(this.keys)) {
       await key.refresh()
     }
-    await this.drawLeftScreen()
-    await this.drawRightScreen()
-  }
-
-  this.getLeftKnobs = () => {
-    const knobs = []
-    if (this.knobs[0]) {
-      knobs.push(this.knobs[0])
-    }
-    if (this.knobs[1]) {
-      knobs.push(this.knobs[1])
-    }
-    if (this.knobs[2]) {
-      knobs.push(this.knobs[2])
-    }
-    return knobs
-  }
-
-  this.drawLeftScreen = async() => {
-    const knobs = this.getLeftKnobs()
-    for (const knob of knobs) {
-      await knob.updateText()
-    }
-    this.device.drawScreen("left", (ctx) => {
-      for (const knob of knobs) {
-        knob.draw(ctx)
+    const toRefresh = new Set()
+    for (const [index, knob] of entries(this.knobs)) {
+      await knob.updateData()
+      if (knob.isRefreshable()) {
+        toRefresh.add(index < 3 ? 'left' : 'right')
       }
-    })
-  }
-
-  this.getRightKnobs = () => {
-    const knobs = []
-    if (this.knobs[3]) {
-      knobs.push(this.knobs[3])
     }
-    if (this.knobs[4]) {
-      knobs.push(this.knobs[4])
-    }
-    if (this.knobs[5]) {
-      knobs.push(this.knobs[5])
-    }
-    return knobs
-  }
-
-  this.drawRightScreen = async() => {
-    const knobs = this.getRightKnobs()
-    for (const knob of knobs) {
-      await knob.updateText()
-    }
-    this.device.drawScreen("right", (ctx) => {
-      for (const knob of knobs) {
-        knob.draw(ctx)
+    for (const screen of toRefresh) {
+      const drawScreen = (ctx) => {
+        for(const index of screenKnobs[screen]) {
+          const knob = this.knobs[index]
+          if(knob) {
+            knob._redraw(ctx)
+          }
+        }
       }
-    })
+      this.device.drawScreen(screen, drawScreen)
+    }
   }
 
   this.hoverKey = async(index) => {

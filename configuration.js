@@ -28,35 +28,40 @@ const entries = Object.entries
 const dbus = sessionBus()
 
 const createSinkKnob = (index, name, sinkName) => {
-  const getText = async function() {
+  async function updateData() {
     const sinks = await getSinkByName(sinkName)
     const name = `${this.name}\n`
     for (const sink of sinks) {
       if (sink.data.mute) {
-        return `${name}(mute)`
+        return {
+          "text": `${name}(mute)`
+        }
       }
       for (const [key, volume] of entries(sink.data.volume)) {
-        return `${name}${volume.value_percent}`
+        return {
+          "text": `${name}${volume.value_percent}`
+        }
       }
     }
-    return `${name}(off)`
+    return {
+      "text": `${name}(off)`
+    }
   }
 
-  const onClick = async() => {
+  async function onClick() {
     const sinks = await getSinkByName(sinkName)
     for (const sink of sinks) {
       await sink.toggleMute()
     }
   }
-  const onChange = async(delta) => {
+  async function onChange(delta) {
     const sinks = await getSinkByName(sinkName)
     for (const sink of sinks) {
       await sink.setVolume(delta == 1 ? "+5%" : "-5%")
     }
   }
-  return new Knob(index, {
-    name,
-    getText,
+  return new Knob(index, name, {
+    updateData,
     onClick,
     onChange
   })
@@ -93,10 +98,9 @@ const createMicButton = (index, name, sinkName) => {
     }
   }
 
-  return new Key(index, {
-    name,
+  return new Key(index, name, {
+    updateData,
     onClick,
-    updateData
   })
 }
 
@@ -118,59 +122,38 @@ const playPauseButton = (index) => {
       }
     }
   }
-  return new Key(index, {
-    name,
-    onClick: playPause,
+  return new Key(index, name, {
     updateData,
+    onClick: playPause,
   })
 }
 
 const firstPage = () => {
   const page = new Page(1)
-  page.addKey(new Key(0, {
-    name: "Previous",
+  page.addKey(new Key(0, "Previous", {
     onClick: previousSong
   }))
   page.addKey(playPauseButton(1))
-  page.addKey(new Key(2, {
-    name: "Next",
+  page.addKey(new Key(2, "Next", {
     onClick: nextSong
   }))
-  page.addKey(new Key(4, {
-    name: "Firefox",
-    onClick: () => {
-      goToWorkspace("w")
-    }
+  page.addKey(new Key(4, "Firefox", {
+    onClick: () => goToWorkspace("w"),
   }))
-  page.addKey(new Key(5, {
-    name: "Chrome",
-    onClick: () => {
-      goToWorkspace("s")
-    }
+  page.addKey(new Key(5, "Chrome", {
+    onClick: () => goToWorkspace("s")
   }))
-  page.addKey(new Key(6, {
-    name: "OBS",
-    onClick: () => {
-      goToWorkspace("c")
-    }
+  page.addKey(new Key(6, "OBS", {
+    onClick: () => goToWorkspace("c")
   }))
-  page.addKey(new Key(7, {
-    name: "ST",
-    onClick: () => {
-      goToWorkspace("q")
-    }
+  page.addKey(new Key(7, "ST", {
+    onClick: () => goToWorkspace("q"),
   }))
-  page.addKey(new Key(8, {
-    name: "Spotify",
-    onClick: () => {
-      goToWorkspace("a")
-    }
+  page.addKey(new Key(8, "Spotify", {
+    onClick: () => goToWorkspace("a"),
   }))
-  page.addKey(new Key(9, {
-    name: "Slack",
-    onClick: () => {
-      goToWorkspace("e")
-    }
+  page.addKey(new Key(9, "Slack", {
+    onClick: () => goToWorkspace("e"),
   }))
 
   page.addKey(createMicButton(10, "Chrome\nMic", chromiumSourceName))

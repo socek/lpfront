@@ -1,63 +1,27 @@
-import _ from 'lodash'
+import {DeviceBased} from "./lp/base.js"
 
 const size = [90 / 2, 90 / 2]
 
-export default class Key {
-  constructor(index, {
-    name,
-    onClick,
+export default class Key extends DeviceBased {
+  constructor(index, name, {
     updateData,
+    onClick,
   }) {
-    this.index = index
-    this.name = name
+    super(index, name, {updateData})
     this.background = "black"
-    this.data = {}
-    this._last_draw = null
-    this._last_update = null
-    this.onClick = onClick || (() => {})
-    this._updateData = updateData || (async() => null)
-    this.device = null
-  }
-
-  setDevice(device) {
-    this.device = device
-  }
-
-  getText() {
-    if (this.data && this.data.text) {
-      return this.data.text
-    }
-    return this.name
-  }
-
-  async updateData() {
-    const newData = await this._updateData.bind(this)()
-    if (!_.isEqual(this.data, newData)) {
-      this.data = newData
-      this._last_update = Date.now()
-    }
-  }
-
-  isRefreshable() {
-    return !this._last_draw || this._last_draw != this._last_update
-  }
-
-  async refresh() {
-    await this.updateData()
-    if (!this.isRefreshable()) {
-      return
-    }
-    this.device.drawKey(this.index, (ctx) => this._redraw(ctx))
-    this._last_draw = this._last_update = Date.now()
+    this.onClick = (onClick || (() => {})).bind(this)
   }
 
   async onHover() {
-
-    this.device.drawKey(this.index, (ctx) => this._redraw(ctx, "blue"))
+    this.forceRedraw("blue")
   }
 
   async onHoverOff() {
-    this.device.drawKey(this.index, (ctx) => this._redraw(ctx))
+    this.forceRedraw()
+  }
+
+  async forceRedraw(forceBackground) {
+    await this.device.drawKey(this.index, (ctx) => this._redraw(ctx, forceBackground))
   }
 
   _redraw(ctx, forceBackground) {
