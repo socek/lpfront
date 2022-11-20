@@ -1,52 +1,55 @@
 const entries = Object.entries
 
-export default function PageContainer() {
-  this.device = null
-  this.pages = {}
-  this.currentPage = 1
+export default class PageContainer {
+  constructor() {
+    this.device = null
+    this.pages = {}
+    this.currentPage = 1
+  }
 
-  this.init = async (device) => {
+  async setDevice(device) {
     this.device = device
     for (const [index, page] of entries(this.pages)) {
-      await page.init(this.device)
+      await page.setDevice(this.device)
     }
   }
 
-  this.addPage = (index, page) => {
+  addPage(index, page) {
     this.pages[index] = page
+    if (this.device) {
+      page.setDevice(device)
+    }
   }
 
-  this.refreshPage = async() => {
+  async refreshPage() {
     const page = this.pages[this.currentPage]
     await page.refreshPage()
   }
 
-  this.clickKnob = async(id) => {
+  async clickKnob(id) {
     const page = this.pages[this.currentPage]
     const knob = page.getKnobById(id)
     knob.onClick(knob)
     await page.refreshPage()
   }
 
-  this.changeKnob = async(id, delta) => {
+  async changeKnob(id, delta) {
     const page = this.pages[this.currentPage]
-    const knob = page.getKnobById(id)
-    knob.onChange(delta)
-    await page.refreshPage()
+    await page.changeKnob(id, delta)
   }
 
-  this.hoverKey = async(index) => {
+  async hoverKey(index) {
     const page = this.pages[this.currentPage]
     await page.hoverKey(index)
   }
 
-  this.touchEnd = async(index) => {
+  async touchEnd(index) {
     const page = this.pages[this.currentPage]
     await page.click(index)
     await page.hoverOff(index)
   }
 
-  this.changePage = async(index) => {
+  async changePage(index) {
     if (!this.pages[index]) {
       console.info(`Page ${index} not exists`)
       return
@@ -56,21 +59,21 @@ export default function PageContainer() {
     await this.lightButtons()
   }
 
-  this.lightButtons = async() => {
+  async lightButtons() {
     for (let index = 1; index < 7; index++) {
       const page = this.pages[index]
       if (page && index == this.currentPage) {
-        this.device.setButtonColor({
+        await this.device.setButtonColor({
           id: `${index}`,
           color: "#0066ff"
         })
       } else if (page) {
-        this.device.setButtonColor({
+        await this.device.setButtonColor({
           id: `${index}`,
           color: "#ff6600"
         })
       } else {
-        this.device.setButtonColor({
+        await this.device.setButtonColor({
           id: `${index}`,
           color: "black"
         })
@@ -78,3 +81,4 @@ export default function PageContainer() {
     }
   }
 }
+

@@ -12,13 +12,15 @@ const screenKnobs = {
   'right': [3, 4, 5],
 }
 
-export default function Page(index) {
-  this.device = null
-  this.index = index
-  this.keys = {}
-  this.knobs = {}
+export default class Page {
+  constructor(index) {
+    this.device = null
+    this.index = index
+    this.keys = {}
+    this.knobs = {}
+  }
 
-  this.init = async(device) => {
+  async setDevice(device) {
     this.device = device
     for (const [index, key] of entries(this.keys)) {
       key.setDevice(device)
@@ -28,21 +30,21 @@ export default function Page(index) {
     }
   }
 
-  this.addKey = (key) => {
+  async addKey(key) {
     this.keys[key.index] = key
     if (this.device) {
       key.setDevice(device)
     }
   }
 
-  this.addKnob = (knob) => {
+  async addKnob(knob) {
     this.knobs[knob.index] = knob
     if (this.device) {
       knob.setDevice(device)
     }
   }
 
-  this.refreshPage = async() => {
+  async refreshPage() {
     for (const [index, key] of entries(this.keys)) {
       await key.refresh()
     }
@@ -55,9 +57,9 @@ export default function Page(index) {
     }
     for (const screen of toRefresh) {
       const drawScreen = (ctx) => {
-        for(const index of screenKnobs[screen]) {
+        for (const index of screenKnobs[screen]) {
           const knob = this.knobs[index]
-          if(knob) {
+          if (knob) {
             knob._redraw(ctx)
           }
         }
@@ -66,28 +68,36 @@ export default function Page(index) {
     }
   }
 
-  this.hoverKey = async(index) => {
+  async hoverKey(index) {
     const key = this.keys[index]
     if (key) {
       await key.onHover()
     }
   }
 
-  this.hoverOff = async(index) => {
+  async hoverOff(index) {
     const key = this.keys[index]
     if (key) {
       await key.onHoverOff()
     }
   }
 
-  this.click = async(index) => {
+  async click(index) {
     const key = this.keys[index]
     if (key) {
       await key.onClick()
     }
   }
 
-  this.getKnobById = (name) => {
+  async changeKnob(id, delta) {
+    const knob = this.getKnobById(id)
+    if (knob) {
+      knob.onChange(delta)
+      await this.refreshPage()
+    }
+  }
+
+  getKnobById(name) {
     const index = knobsTranslator[name]
     return this.knobs[index]
   }

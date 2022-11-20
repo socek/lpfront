@@ -27,9 +27,9 @@ import {
 const entries = Object.entries
 const dbus = sessionBus()
 
-const createSinkKnob = (index, name, sinkName) => {
+const createSinkKnob = (index, name, sinkName, typename) => {
   async function updateData() {
-    const sinks = await getSinkByName(sinkName)
+    const sinks = await getSinkByName(sinkName, typename)
     const name = `${this.name}\n`
     for (const sink of sinks) {
       if (sink.data.mute) {
@@ -49,13 +49,13 @@ const createSinkKnob = (index, name, sinkName) => {
   }
 
   async function onClick() {
-    const sinks = await getSinkByName(sinkName)
+    const sinks = await getSinkByName(sinkName, typename)
     for (const sink of sinks) {
       await sink.toggleMute()
     }
   }
   async function onChange(delta) {
-    const sinks = await getSinkByName(sinkName)
+    const sinks = await getSinkByName(sinkName, typename)
     for (const sink of sinks) {
       await sink.setVolume(delta == 1 ? "+5%" : "-5%")
     }
@@ -69,7 +69,7 @@ const createSinkKnob = (index, name, sinkName) => {
 
 const createMicButton = (index, name, sinkName) => {
   async function onClick() {
-    const sinks = await getSinkByName(sinkName)
+    const sinks = await getSinkByName(sinkName, "Source Output")
     for (const sink of sinks) {
       sink.toggleMute()
     }
@@ -163,7 +163,7 @@ const firstPage = () => {
   page.addKnob(createSinkKnob(1, "Spotify", spotifySinkName))
   page.addKnob(createSinkKnob(2, "Chrome", chromiumSinkName))
   page.addKnob(createSinkKnob(3, "Firefox", firefoxSinkName))
-  page.addKnob(createSinkKnob(4, "Discord", discordSourceName))
+  page.addKnob(createSinkKnob(4, "Discord", discordSourceName, "Sink Input"))
 
   return page
 }

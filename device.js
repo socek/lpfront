@@ -32,8 +32,8 @@ const ensureConnectionWorker = async () => {
 device.on('connect', async () => {
     console.info('Connection successful!')
     state.connection = STATES.connected
+    pages.setDevice(device)
     await device.setBrightness(1)
-    pages.init(device)
     await pages.lightButtons()
     await pages.refreshPage()
     updateKnobsTask = setInterval(async() => {
