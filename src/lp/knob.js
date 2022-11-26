@@ -1,6 +1,6 @@
-import {
+const {
   DeviceBased
-} from "./lp/base.js"
+} = await imp("@src/lp/base.js")
 
 const canvases = [60 / 2, 270 / 3 / 2]
 
@@ -10,7 +10,9 @@ export default class Knob extends DeviceBased {
     onClick,
     onChange,
   }) {
-    super(index, name, {updateData})
+    super(index, name, {
+      updateData
+    })
     this.background = "black"
     this.onClick = (onClick || (() => {})).bind(this)
     this.onChange = (onChange || (() => {})).bind(this)

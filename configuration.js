@@ -1,30 +1,33 @@
-import Page from './src/page.js'
-import PageContainer from './src/page_container.js'
-import Key from './src/key.js'
-import Knob from './src/knob.js'
-import {
+const Page = await imp("@src/lp/page.js", true)
+const PageContainer = await imp("@src/lp/page_container.js", true)
+const Key = await imp("@src/lp/key.js", true)
+const Knob = await imp("@src/lp/knob.js", true)
+const {
   previousSong,
   nextSong,
   playPause
-} from "./src/spotify.js"
-import {
+} = await imp("@src/externals/spotify.js")
+const {
   goToWorkspace
-} from "./src/i3.js"
-import {
+} = await imp("@src/externals/i3.js")
+const {
   getSinkByName,
-} from "./src/pulseaudio.js"
-import {
+} = await imp("@src/externals/pulseaudio.js")
+const {
   mainSinkName,
   chromiumSinkName,
   spotifySinkName,
   firefoxSinkName,
   discordSourceName,
   chromiumSourceName,
-} from "./src/settings.js"
-import {
+} = await imp("@src/settings.js")
+const {
   sessionBus,
-} from 'dbus-next'
-const entries = Object.entries
+} = await imp('dbus-next')
+const {
+  entries
+} = await imp('@src/utils.js')
+
 const dbus = sessionBus()
 
 const createSinkKnob = (index, name, sinkName, typename) => {

@@ -1,11 +1,16 @@
-global.aimport = async(path) => {
-  const cwd = process.cwd()
-  const fullpath = `${cwd}${path}`
-  return import(fullpath)
-}
+const aliases = [
+  ["@src", `${process.cwd()}/src`],
+  ["@", process.cwd()],
+]
 
-global.dimport = async(path) => {
-  const cwd = process.cwd()
-  const fullpath = `${cwd}${path}`
-  return (await import(fullpath)).default
+global.imp = async(path, isDefault) => {
+  isDefault = isDefault || false
+  for (const [alias, fullpath] of aliases) {
+    path = path.replace(alias, fullpath)
+  }
+  const mod = await import (path)
+  if (isDefault) {
+    return mod.default
+  }
+  return mod
 }

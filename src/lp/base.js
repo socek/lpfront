@@ -1,6 +1,6 @@
-import _ from 'lodash'
-
-const isEqual = _.isEqual
+const {
+  isEqual
+} = await imp('lodash', true)
 
 export class DeviceBased {
   constructor(index, name, {updateData}) {

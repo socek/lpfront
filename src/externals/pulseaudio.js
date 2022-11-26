@@ -1,11 +1,13 @@
-import util from "util"
-import cp from "child_process"
-import {
+const {
   cacheInvalidationTime
-} from "../const.js"
-import _ from 'lodash'
-const exec = util.promisify(cp.exec)
-const ent = Object.entries
+} = await imp("@/const.js")
+const {
+  isEqual
+} = await imp('lodash', true)
+const {
+  exec,
+  entries
+} = await imp('@src/utils.js')
 
 let cache = null
 let last_cache_refresh = null
@@ -34,7 +36,7 @@ class PAItem {
 
   getVolume() {
     if (sink.mute) return null
-    for (const [name, volume] of ent(this.data.volume)) {
+    for (const [name, volume] of entries(this.data.volume)) {
       return volume.value_percent
     }
     return null
@@ -117,6 +119,7 @@ export const getSinks = async(force) => {
 
 export const getSinkByName = async(name, typename) => {
   const sinks = await getSinks()
+  // console.log(sinks)
   const results = []
   for (const paitem of sinks) {
     if (paitem.name === name) {
@@ -139,5 +142,5 @@ export const isSinksEqual = (left, right) => {
     // Latency is a very dynamicly change value
   delete left.data.latency
   delete right.data.latency
-  return _.isEqual(left, right)
+  return isEqual(left, right)
 }

@@ -1,7 +1,4 @@
-import util from "util"
-import cp from "child_process"
-
-const exec = util.promisify(cp.exec)
+const {exec} = await imp('@src/utils.js')
 
 export const previousSong = async () => {
   const cmd = "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous"

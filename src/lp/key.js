@@ -1,4 +1,6 @@
-const {DeviceBased} = await aimport("/src/lp/base.js")
+const {
+  DeviceBased
+} = await imp("@src/lp/base.js")
 
 const size = [90 / 2, 90 / 2]
 
@@ -7,7 +9,9 @@ export default class Key extends DeviceBased {
     updateData,
     onClick,
   }) {
-    super(index, name, {updateData})
+    super(index, name, {
+      updateData
+    })
     this.background = "black"
     this.onClick = (onClick || (() => {})).bind(this)
   }

@@ -1,7 +1,4 @@
-import util from "util"
-import cp from "child_process"
-
-const exec = util.promisify(cp.exec)
+const {exec} = await imp('@src/utils.js')
 
 export const i3Msg = async (command) => {
   await exec(`i3-msg '${command}'`)

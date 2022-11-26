@@ -1,7 +1,7 @@
 import { sleep } from "./utils.js"
 import { device } from "./const.js"
 
-const pages = await dimport("/configuration.js")
+const pages = await imp("@/configuration.js", true)
 
 const STATES = {
   notConnected: 1,
