@@ -1,4 +1,4 @@
-import {DeviceBased} from "./lp/base.js"
+const {DeviceBased} = await aimport("/src/lp/base.js")
 
 const size = [90 / 2, 90 / 2]
 
