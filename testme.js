@@ -1,27 +1,39 @@
-import {
-    getSinks
-} from "./src/pulseaudio.js"
-import Key from "./src/key.js"
-
 import _ from 'lodash'
+import OBSWebSocket from 'obs-websocket-js'
 
 const start = async() => {
-    // let sinks = await getSinks()
-    // for (const sink of sinks) {
-    //     console.log(sink.name, sink.type)
-    // }
-    // let first = (await getSinks())[0]
-    // let second = (await getSinks(true))[0]
+    const obs = new OBSWebSocket();
+    await obs.connect('ws://127.0.0.1:4455', "7NvMa1NwRTCssaXI")
+    console.log("Connected...")
+    try {
+        await obs.call('SetCurrentProgramScene', {
+            sceneName: 'Mój Ryj'
+        })
+    } catch (error) {
+        console.log("e", error)
+    }
 
-    // console.log("c", isSinksEqual(first, second))
-    // console.log("c", first.data.latency, second.data.latency, )
+    await new Promise(r => setTimeout(r, 1000))
 
-    const left = {"one": 1}
-    const right = {"one": 1}
-    const third = {"one": 2}
+    try {
+        await obs.call('SetCurrentProgramScene', {
+            sceneName: 'Gra'
+        })
+    } catch (error) {
+        console.log("e", error)
+    }
 
-    console.log(_.isEqual(left, right))
-    console.log(_.isEqual(left, third))
+    await new Promise(r => setTimeout(r, 1000))
+
+    try {
+        await obs.call('SetCurrentProgramScene', {
+            sceneName: 'Pulpit Środek'
+        })
+    } catch (error) {
+        console.log("e", error)
+    }
+
+    // console.log(process.cwd())
 }
 
 start()
