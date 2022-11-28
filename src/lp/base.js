@@ -24,9 +24,9 @@ export class DeviceBased {
     return this.name
   }
 
-  async updateData() {
+  async updateData(force) {
     const newData = await this._updateData.bind(this)()
-    if (!isEqual(this.data, newData)) {
+    if (force || !isEqual(this.data, newData)) {
       this.data = newData
       this._last_update = Date.now()
     }
@@ -36,9 +36,9 @@ export class DeviceBased {
     return !this._last_redraw || this._last_redraw != this._last_update
   }
 
-  async refresh() {
-    await this.updateData()
-    if (!this.isRefreshable()) {
+  async refresh(force) {
+    await this.updateData(force)
+    if (!force && !this.isRefreshable()) {
       return
     }
     await this.forceRedraw()

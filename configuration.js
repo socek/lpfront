@@ -14,19 +14,18 @@ const {
   getSinkByName,
 } = await imp("@src/externals/pulseaudio.js")
 const {
-  mainSinkName,
-  chromiumSinkName,
-  spotifySinkName,
-  firefoxSinkName,
-  discordSourceName,
-  chromiumSourceName,
-} = await imp("@src/settings.js")
-const {
   sessionBus,
 } = await imp('dbus-next')
 const {
   entries
 } = await imp('@src/utils.js')
+
+const mainSinkName = "Sound BlasterX G6 Digital Stereo (IEC958)"
+const chromiumSinkName = "Chromium"
+const spotifySinkName = "Spotify"
+const firefoxSinkName = "FirefoxSink"
+const discordSourceName = "WEBRTC VoiceEngine"
+const chromiumSourceName = "Chromium input"
 
 const dbus = sessionBus()
 

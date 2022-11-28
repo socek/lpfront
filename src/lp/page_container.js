@@ -21,9 +21,9 @@ export default class PageContainer {
     }
   }
 
-  async refreshPage() {
+  async refreshPage(force) {
     const page = this.pages[this.currentPage]
-    await page.refreshPage()
+    await page.refreshPage(force)
   }
 
   async clickKnob(id) {
@@ -38,9 +38,9 @@ export default class PageContainer {
     await page.changeKnob(id, delta)
   }
 
-  async hoverKey(index) {
+  async touchStart(index) {
     const page = this.pages[this.currentPage]
-    await page.hoverKey(index)
+    await page.hoverOn(index)
   }
 
   async touchEnd(index) {

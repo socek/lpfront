@@ -36,9 +36,11 @@ device.on('connect', async () => {
     await device.setBrightness(1)
     await pages.lightButtons()
     await pages.refreshPage()
-    updateKnobsTask = setInterval(async() => {
-      await pages.refreshPage()
-    }, 100)
+    if(!updateKnobsTask) {
+      updateKnobsTask = setInterval(async() => {
+        await pages.refreshPage()
+      }, 100)
+    }
 })
 
 device.on('disconnect', (payload) => {

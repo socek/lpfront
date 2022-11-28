@@ -44,14 +44,14 @@ export default class Page {
     }
   }
 
-  async refreshPage() {
+  async refreshPage(force) {
     for (const [index, key] of entries(this.keys)) {
-      await key.refresh()
+      await key.refresh(force)
     }
     const toRefresh = new Set()
     for (const [index, knob] of entries(this.knobs)) {
       await knob.updateData()
-      if (knob.isRefreshable()) {
+      if (force || knob.isRefreshable()) {
         toRefresh.add(index < 3 ? 'left' : 'right')
       }
     }
@@ -68,7 +68,7 @@ export default class Page {
     }
   }
 
-  async hoverKey(index) {
+  async hoverOn(index) {
     const key = this.keys[index]
     if (key) {
       await key.onHover()

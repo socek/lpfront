@@ -1,6 +1,0 @@
-export const mainSinkName = "Sound BlasterX G6 Digital Stereo (IEC958)"
-export const chromiumSinkName = "Chromium"
-export const spotifySinkName = "Spotify"
-export const firefoxSinkName = "Firefox"
-export const discordSourceName = "WEBRTC VoiceEngine"
-export const chromiumSourceName = "Chromium input"
