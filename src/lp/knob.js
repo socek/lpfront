@@ -13,7 +13,6 @@ export default class Knob extends DeviceBased {
     super(index, name, {
       updateData
     })
-    this.background = "black"
     this.onClick = (onClick || (() => {})).bind(this)
     this.onChange = (onChange || (() => {})).bind(this)
   }
@@ -28,7 +27,7 @@ export default class Knob extends DeviceBased {
   }
 
   _redraw(ctx, forceBackground) {
-    const background = forceBackground || this.background
+    const background = forceBackground || (this.data && this.data.background) || 'black'
     ctx.font = "11px consolas";
     ctx.textBaseline = "top";
     ctx.fillStyle = "white";

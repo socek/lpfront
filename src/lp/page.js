@@ -45,6 +45,9 @@ export default class Page {
   }
 
   async refreshPage(force) {
+    if (force) {
+      await this.clearPage()
+    }
     for (const [index, key] of entries(this.keys)) {
       await key.refresh(force)
     }
@@ -66,6 +69,22 @@ export default class Page {
       }
       this.device.drawScreen(screen, drawScreen)
     }
+  }
+
+  async clearPage() {
+    const clearBorderScreen = (ctx) => {
+      ctx.fillStyle = 'black'
+      ctx.fillRect(0, 0, 60, 280)
+    }
+    const clearCenterScreen = (ctx) => {
+      ctx.fillStyle = 'black'
+      ctx.fillRect(0, 0, 360, 270)
+    }
+    await Promise.all([
+      this.device.drawScreen('left', clearBorderScreen),
+      this.device.drawScreen('right', clearBorderScreen),
+      this.device.drawScreen('center', clearCenterScreen),
+    ])
   }
 
   async hoverOn(index) {

@@ -4,12 +4,9 @@ const {
 const {
   sleep
 } = await imp('@/utils.js')
-
-const STATES = {
-  notConnected: 1,
-  connecting: 2,
-  connected: 3,
-}
+const {
+  STATES
+} = await imp("@/const.js")
 
 export default class LoupedeckDriver {
   state = STATES.notConnected

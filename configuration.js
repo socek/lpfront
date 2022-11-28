@@ -19,6 +19,12 @@ const {
 const {
   entries
 } = await imp('@src/utils.js')
+const {
+  OBSDriver,
+} = await imp("@src/externals/obs.js")
+const {
+  STATES
+} = await imp("@/const.js")
 
 const mainSinkName = "Sound BlasterX G6 Digital Stereo (IEC958)"
 const chromiumSinkName = "Chromium"
@@ -28,6 +34,7 @@ const discordSourceName = "WEBRTC VoiceEngine"
 const chromiumSourceName = "Chromium input"
 
 const dbus = sessionBus()
+const obs = new OBSDriver()
 
 const createSinkKnob = (index, name, sinkName, typename) => {
   async function updateData() {
@@ -81,22 +88,69 @@ const createMicButton = (index, name, sinkName) => {
   async function updateData() {
     const sinks = await getSinkByName(sinkName, "Source Output")
     if (sinks.length == 0) {
-      this.background = "grey"
       return {
+        "background": "grey",
         "text": `${this.name}\nOff`
       }
     }
     for (const sink of sinks) {
       if (sink.data.mute) {
-        this.background = "red"
         return {
+          "background": "red",
           "text": `${this.name}\nMuted`
         }
       }
     }
-    this.background = "green"
     return {
+      "background": "green",
       "text": `${this.name}\nOn`
+    }
+  }
+
+  return new Key(index, name, {
+    updateData,
+    onClick,
+  })
+}
+
+const createObsSceneButton = (index, name, sceneName) => {
+  async function onClick() {
+    await obs.establishConnection()
+    await obs.setCurrentProgramScene(sceneName)
+    this.refresh()
+  }
+
+  async function updateData() {
+    await obs.establishConnection()
+    const currentScene = await obs.getCurrentProgramScene()
+    const background = currentScene == sceneName ? 'green' : 'black'
+    return {
+      "text": `${this.name}`,
+      background
+    }
+  }
+
+  return new Key(index, name, {
+    updateData,
+    onClick,
+  })
+}
+
+const createObsSourceButton = (index, name, sourceName) => {
+  async function onClick() {
+    await obs.establishConnection()
+    await obs.setSourceEnabled(sourceName, this.data ? !this.data.isActive : false)
+    this.refresh()
+  }
+
+  async function updateData() {
+    await obs.establishConnection()
+    const isActive = (await obs.getSourceEnabled(sourceName))
+    const background = isActive ? 'green' : 'black'
+    return {
+      "isActive": isActive,
+      "text": `${this.name}`,
+      background
     }
   }
 
@@ -113,13 +167,13 @@ const playPauseButton = (index) => {
     const player = proxy.getInterface('org.freedesktop.DBus.Properties')
     const properties = await player.Get("org.mpris.MediaPlayer2.Player", "PlaybackStatus")
     if (properties.value === "Playing") {
-      this.background = "green"
       return {
+        "background": "green",
         "text": "Pause"
       }
     } else {
-      this.background = "grey"
       return {
+        "background": "grey",
         "text": "Play"
       }
     }
@@ -170,6 +224,20 @@ const firstPage = () => {
   return page
 }
 
+const secondPage = () => {
+  const page = new Page(2)
+  page.addKey(createObsSceneButton(0, "Mój Ryj", "Mój Ryj"))
+  page.addKey(createObsSceneButton(1, "Lewy", "Pulpit Lewy"))
+  page.addKey(createObsSceneButton(2, "Środkowy", "Pulpit Środek"))
+  page.addKey(createObsSceneButton(3, "Prawy", "Pulpit Prawy"))
+  page.addKey(createObsSceneButton(4, "zw", "I'll be back"))
+  page.addKey(createObsSceneButton(5, "Gra", "Gra"))
+  page.addKey(createObsSourceButton(8, "Kamera", "Kamera"))
+
+  return page
+}
+
 const pageContainer = new PageContainer()
 pageContainer.addPage(1, firstPage())
+pageContainer.addPage(2, secondPage())
 export default pageContainer;

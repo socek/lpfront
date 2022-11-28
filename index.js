@@ -5,6 +5,8 @@ const start = async() => {
   const LpDriver = await imp("@src/driver.js", true)
   const pageContainer = await imp("@/configuration.js", true)
 
+  const {OBSDriver} = await imp("@src/externals/obs.js")
+
   const app = new Application()
   const driver = new LpDriver()
   app.addDevice(driver)

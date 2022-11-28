@@ -12,10 +12,21 @@ import "./imports.js"
 // console.log("mainSinkName", mainSinkName)
 // console.log("Page", Page)
 // console.log("OBSWebSocket", OBSWebSocket)
-const {spotifySinkName} = await imp("@src/settings.js")
-console.log(await getSinkByName(spotifySinkName))
+// const {spotifySinkName} = await imp("@src/settings.js")
+// console.log(await getSinkByName(spotifySinkName))
+
+const {
+  OBSDriver,
+} = await imp("@src/externals/obs.js")
 
 const start = async() => {
+    const obs = new OBSDriver()
+    await obs.establishConnection()
+    let result = await obs.obs.call("GetSceneItemId", {sceneName: "Pulpit Środek", sourceName: "Kamera"})
+    const sceneItemId = result.sceneItemId
+
+    result = await obs.obs.call("GetSceneItemEnabled", {sceneName: "Pulpit Środek", sceneItemId})
+    console.log(result)
     // const obs = new OBSWebSocket();
     // await obs.connect('ws://127.0.0.1:4455', "7NvMa1NwRTCssaXI")
     // console.log("Connected...")

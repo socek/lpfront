@@ -55,7 +55,7 @@ export default class PageContainer {
       return
     }
     this.currentPage = index
-    await this.refreshPage()
+    await this.refreshPage(true)
     await this.lightButtons()
   }
 

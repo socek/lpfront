@@ -12,7 +12,6 @@ export default class Key extends DeviceBased {
     super(index, name, {
       updateData
     })
-    this.background = "black"
     this.onClick = (onClick || (() => {})).bind(this)
   }
 
@@ -29,7 +28,7 @@ export default class Key extends DeviceBased {
   }
 
   _redraw(ctx, forceBackground) {
-    const background = forceBackground || this.background
+    const background = forceBackground || (this.data && this.data.background) || 'black'
     ctx.fillStyle = background
     ctx.fillRect(0, 0, 90, 90)
     ctx.font = "14px consolas"
