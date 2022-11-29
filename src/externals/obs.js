@@ -17,10 +17,24 @@ export class OBSDriver {
   async establishConnection() {
     if(this.state === STATES.notConnected) {
       this.state = STATES.connecting
-      await this.obs.connect('ws://127.0.0.1:4455', '7NvMa1NwRTCssaXI')
+      try {
+        await this.obs.connect('ws://127.0.0.1:4455', '7NvMa1NwRTCssaXI')
+      } catch (error) {
+        this.state = STATES.notConnected
+        return this.state
+      }
       console.info("Connection to obs established")
       this.state = STATES.connected
+    } else {
+      try {
+        await this.obs.call('GetVersion')
+      } catch (er) {
+        console.warn("Connection to obs lost...")
+        this.state = STATES.notConnected
+        return this.state
+      }
     }
+    return this.state
   }
 
   async endConnection() {

@@ -29,7 +29,7 @@ const {
 const mainSinkName = "Sound BlasterX G6 Digital Stereo (IEC958)"
 const chromiumSinkName = "Chromium"
 const spotifySinkName = "Spotify"
-const firefoxSinkName = "FirefoxSink"
+const firefoxSinkName = "Simultaneous output to Sound BlasterX G6 Digital Stereo (IEC958)"
 const discordSourceName = "WEBRTC VoiceEngine"
 const chromiumSourceName = "Chromium input"
 
@@ -115,18 +115,39 @@ const createMicButton = (index, name, sinkName) => {
 
 const createObsSceneButton = (index, name, sceneName) => {
   async function onClick() {
-    await obs.establishConnection()
-    await obs.setCurrentProgramScene(sceneName)
-    this.refresh()
+    const conn = await obs.establishConnection()
+    if (conn == STATES.connected) {
+      try {
+        await obs.setCurrentProgramScene(sceneName)
+      } catch (er) {
+        return
+      }
+      this.refresh()
+    }
   }
 
   async function updateData() {
-    await obs.establishConnection()
-    const currentScene = await obs.getCurrentProgramScene()
-    const background = currentScene == sceneName ? 'green' : 'black'
+    const conn = await obs.establishConnection()
+    if (conn == STATES.connected) {
+      let currentScene = null
+      try {
+        currentScene = await obs.getCurrentProgramScene()
+      } catch (er) {
+        return {
+          "text": `${this.name}`,
+          "background": "grey",
+        }
+      }
+      const background = currentScene == sceneName ? 'green' : 'black'
+      return {
+        "text": `${this.name}`,
+        background
+      }
+    }
+
     return {
       "text": `${this.name}`,
-      background
+      "background": "grey",
     }
   }
 
@@ -138,19 +159,42 @@ const createObsSceneButton = (index, name, sceneName) => {
 
 const createObsSourceButton = (index, name, sourceName) => {
   async function onClick() {
-    await obs.establishConnection()
-    await obs.setSourceEnabled(sourceName, this.data ? !this.data.isActive : false)
-    this.refresh()
+    const conn = await obs.establishConnection()
+    if (conn == STATES.connected) {
+      try {
+        await obs.setSourceEnabled(sourceName, this.data ? !this.data.isActive : false)
+      } catch (er) {
+        return
+      }
+      this.refresh()
+    }
   }
 
   async function updateData() {
-    await obs.establishConnection()
-    const isActive = (await obs.getSourceEnabled(sourceName))
-    const background = isActive ? 'green' : 'black'
+    const conn = await obs.establishConnection()
+    if (conn == STATES.connected) {
+      let isActive = null
+      try {
+        isActive = (await obs.getSourceEnabled(sourceName))
+      } catch (er) {
+        return {
+          "text": `${this.name}`,
+          "background": "grey",
+          "isActive": false,
+        }
+      }
+      const background = isActive ? 'green' : 'black'
+      return {
+        "isActive": isActive,
+        "text": `${this.name}`,
+        background
+      }
+    }
+
     return {
-      "isActive": isActive,
       "text": `${this.name}`,
-      background
+      "background": "grey",
+      "isActive": false,
     }
   }
 

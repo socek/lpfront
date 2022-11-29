@@ -15,18 +15,51 @@ import "./imports.js"
 // const {spotifySinkName} = await imp("@src/settings.js")
 // console.log(await getSinkByName(spotifySinkName))
 
+const me = (fun) => {
+    function wrapper() {
+        console.log("wrapper", this)
+        return fun()
+    }
+    return wrapper
+}
+
+class Abc {
+    constructor() {
+        console.log("Abc: A")
+        this.doSomething = me(this.doSomething.bind(this))
+    }
+
+
+    doSomething() {
+        console.log("something", this)
+    }
+
+}
+
+
+
+const elo = me(() => {
+    console.log('elo')
+})
+
 const {
-  OBSDriver,
+    OBSDriver,
 } = await imp("@src/externals/obs.js")
 
 const start = async() => {
-    const obs = new OBSDriver()
-    await obs.establishConnection()
-    let result = await obs.obs.call("GetSceneItemId", {sceneName: "Pulpit Środek", sourceName: "Kamera"})
-    const sceneItemId = result.sceneItemId
+    // const obs = new OBSDriver()
+    // await obs.establishConnection()
+    console.log("c")
+    elo()
 
-    result = await obs.obs.call("GetSceneItemEnabled", {sceneName: "Pulpit Środek", sceneItemId})
-    console.log(result)
+    const abc = new Abc()
+    console.log("d")
+    abc.doSomething()
+        // let result = await obs.obs.call("GetSceneItemId", {sceneName: "Pulpit Środek", sourceName: "Kamera"})
+        // const sceneItemId = result.sceneItemId
+
+    // result = await obs.obs.call("GetSceneItemEnabled", {sceneName: "Pulpit Środek", sceneItemId})
+    // console.log(result)
     // const obs = new OBSWebSocket();
     // await obs.connect('ws://127.0.0.1:4455', "7NvMa1NwRTCssaXI")
     // console.log("Connected...")
