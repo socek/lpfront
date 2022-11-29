@@ -25,6 +25,9 @@ const {
 const {
   STATES
 } = await imp("@/const.js")
+const {
+  spawn
+} = await imp("child_process")
 
 const mainSinkName = "Sound BlasterX G6 Digital Stereo (IEC958)"
 const chromiumSinkName = "Chromium"
@@ -204,6 +207,63 @@ const createObsSourceButton = (index, name, sourceName) => {
   })
 }
 
+const createObsVirtualCameraButton = (index, name) => {
+  async function onClick() {
+    const conn = await obs.establishConnection()
+    if (conn == STATES.connected) {
+      try {
+        await obs.toggleVirtualCam()
+      } catch (er) {
+        return
+      }
+      this.refresh()
+    }
+  }
+
+  async function updateData() {
+    const conn = await obs.establishConnection()
+    if (conn == STATES.connected) {
+      let isActive = null
+      try {
+        isActive = await obs.getVirtualCamStatus()
+      } catch (er) {
+        return {
+          "text": `${this.name}`,
+          "background": "grey",
+          "isActive": false,
+        }
+      }
+      const background = isActive ? 'green' : 'black'
+      return {
+        "isActive": isActive,
+        "text": `${this.name}`,
+        background
+      }
+    }
+
+    return {
+      "text": `${this.name}`,
+      "background": "grey",
+      "isActive": false,
+    }
+  }
+
+  return new Key(index, name, {
+    updateData,
+    onClick,
+  })
+}
+
+const startObsButton = (index, name) => {
+  async function onClick() {
+    spawn("/home/socek/bin/obs", null, {detached: true})
+  }
+
+  return new Key(index, name, {
+    onClick,
+  })
+}
+
 const playPauseButton = (index) => {
   const name = 'Play/Pause'
   async function updateData() {
@@ -277,6 +337,8 @@ const secondPage = () => {
   page.addKey(createObsSceneButton(4, "zw", "I'll be back"))
   page.addKey(createObsSceneButton(5, "Gra", "Gra"))
   page.addKey(createObsSourceButton(8, "Kamera", "Kamera"))
+  page.addKey(createObsVirtualCameraButton(8, "Virtual\nCamera"))
+  page.addKey(startObsButton(11, "Start OBS"))
 
   return page
 }

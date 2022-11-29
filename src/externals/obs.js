@@ -72,6 +72,16 @@ export class OBSDriver {
     const sceneItemId = result.sceneItemId
     return await this.obs.call("SetSceneItemEnabled", {sceneName, sceneItemId, sceneItemEnabled})
   }
+
+  async getVirtualCamStatus() {
+    const result = await this.obs.call("GetVirtualCamStatus")
+    return result.outputActive
+  }
+
+  async toggleVirtualCam() {
+    const result = await this.obs.call("ToggleVirtualCam")
+    return result.outputActive
+  }
 }
 
 export const endAllConnections = async() => {
