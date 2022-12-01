@@ -1,16 +1,35 @@
 import "./imports.js"
 
-const start = async() => {
-  const Application = await imp("@src/app.js", true)
-  const LpDriver = await imp("@src/driver.js", true)
+const Application = await imp("@src/app.js", true)
+const LpDriver = await imp("@src/driver.js", true)
+
+const PulseAudioPlugin = await imp("@src/plugins/pulseaudio/plugin.js", true)
+const SpotifyPlugin = await imp("@src/plugins/spotify/plugin.js", true)
+const I3Plugin = await imp("@src/plugins/i3/plugin.js", true)
+const ExecPlugin = await imp("@src/plugins/exec/plugin.js", true)
+
+const oldStart = async() => {
   const pageContainer = await imp("@/configuration.js", true)
-
-  const {OBSDriver} = await imp("@src/externals/obs.js")
-
   const app = new Application()
   const driver = new LpDriver()
+  app.pages = pageContainer
   app.addDevice(driver)
-  driver.setPageContainer(pageContainer)
   driver.connect()
 }
-start()
+
+const newStart = async() => {
+  const driver = new LpDriver()
+  const app = new Application()
+
+  app.addPlugin(new PulseAudioPlugin())
+  app.addPlugin(new SpotifyPlugin())
+  app.addPlugin(new I3Plugin())
+  app.addPlugin(new ExecPlugin())
+
+  await app.readConfiguration()
+  await app.applyConfiguration()
+  app.addDevice(driver)
+  driver.connect()
+}
+// oldStart()
+newStart()

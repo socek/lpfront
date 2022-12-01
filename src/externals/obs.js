@@ -82,6 +82,16 @@ export class OBSDriver {
     const result = await this.obs.call("ToggleVirtualCam")
     return result.outputActive
   }
+
+  async getStreamStatus() {
+    const result = await this.obs.call("GetStreamStatus")
+    return result
+  }
+
+  async toggleStream() {
+    const result = await this.obs.call("ToggleStream")
+    return result.outputActive
+  }
 }
 
 export const endAllConnections = async() => {

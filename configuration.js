@@ -264,6 +264,51 @@ const startObsButton = (index, name) => {
   })
 }
 
+const obsStreamButton = (index, name) => {
+  async function onClick() {
+    const conn = await obs.establishConnection()
+    if (conn == STATES.connected) {
+      try {
+        await obs.toggleStream()
+      } catch (er) {
+        return
+      }
+      this.refresh()
+    }
+  }
+
+  async function updateData() {
+    const conn = await obs.establishConnection()
+    if (conn == STATES.connected) {
+      let status = null
+      try {
+        status = await obs.getStreamStatus()
+      } catch (er) {
+        return {
+          "text": `${this.name}`,
+          "background": "grey",
+        }
+      }
+      const background = status.outputActive ? 'green' : 'black'
+      const timecode = status.outputActive ? `\n ${status.outputTimecode.slice(0, -4)}` : ""
+      return {
+        "text": `${this.name}${timecode}`,
+        background
+      }
+    }
+
+    return {
+      "text": `${this.name}`,
+      "background": "grey",
+    }
+  }
+
+  return new Key(index, name, {
+    updateData,
+    onClick,
+  })
+}
+
 const playPauseButton = (index) => {
   const name = 'Play/Pause'
   async function updateData() {
@@ -338,6 +383,7 @@ const secondPage = () => {
   page.addKey(createObsSceneButton(5, "Gra", "Gra"))
   page.addKey(createObsSourceButton(8, "Kamera", "Kamera"))
   page.addKey(createObsVirtualCameraButton(8, "Virtual\nCamera"))
+  page.addKey(obsStreamButton(10, "Stream"))
   page.addKey(startObsButton(11, "Start OBS"))
 
   return page
