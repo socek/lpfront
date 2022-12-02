@@ -84,7 +84,6 @@ export default class Application {
           console.warn(`Not avalible plugin for: ${knobConfiguration.type}`)
           continue
         }
-        console.log(`Adding Knob: ${knobConfiguration.name} ${knobConfiguration.type}`)
         page.addKnob(knobFunction(kIndex - 1, knobConfiguration))
       }
 
