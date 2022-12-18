@@ -1,10 +1,10 @@
 const Knob = await imp("@src/lp/knob.js", true)
 const {
-  getSinkByName,
-} = await imp("@src/externals/pulseaudio.js")
-const {
   entries
 } = await imp('@src/utils.js')
+import {
+  getSinkByName
+} from "./pulseaudio.js"
 
 export const sinkKnob = (index, {
   name,

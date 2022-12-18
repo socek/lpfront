@@ -1,6 +1,6 @@
 const {
   endAllConnections
-} = await imp("@src/externals/obs.js")
+} = await imp("@src/plugins/obs/external.js")
 const toml = await imp("toml", true)
 const {
   access,

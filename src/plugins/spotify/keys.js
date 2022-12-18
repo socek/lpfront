@@ -2,11 +2,11 @@ const Key = await imp("@src/lp/key.js", true)
 const {
   sessionBus,
 } = await imp('dbus-next')
-const {
+import {
   previousSong,
   nextSong,
   playPause
-} = await imp("@src/externals/spotify.js")
+} from "./spotify.js"
 
 const dbus = sessionBus()
 
