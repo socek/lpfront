@@ -44,13 +44,23 @@ class PAItem {
 
   async setVolume(volume) {
     const cmd = `pactl ${this.commands.setVolume} ${this.data.index} ${volume}`
-    await exec(cmd)
+    try {
+      await exec(cmd)
+    } catch (er) {
+      console.warning("pactl: returned error")
+      return;
+    }
     invalidateCache()
   }
 
   async toggleMute() {
     const cmd = `pactl ${this.commands.mute} ${this.data.index} toggle`
-    await exec(cmd)
+    try {
+      await exec(cmd)
+    } catch (er) {
+      console.warning("pactl: returned error")
+      return;
+    }
     invalidateCache()
   }
 }
@@ -96,11 +106,17 @@ export const getSinks = async(force) => {
   if (!force && !isCacheExpired()) {
     return cache
   }
-  const {
-    stdout,
-    stderr
-  } = await exec("pactl -f json list")
-  const result = JSON.parse(stdout)
+  let result;
+  try {
+    const {
+      stdout,
+      stderr
+    } = await exec("pactl -f json list")
+    result = JSON.parse(stdout)
+  } catch (er) {
+    console.warning("pactl: returned error")
+    return cache;
+  }
 
   const items = []
   for (const element of result["sinks"]) {

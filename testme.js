@@ -1,25 +1,9 @@
 import "./imports.js"
-const {
-    inspect
-} = await imp('util')
-const {
-    getWorkspaceByName
-} = await imp("@src/plugins/i3/external.js")
 
-// const Application = await imp("@src/app.js", true)
-// const PulseAudioPlugin = await imp("@src/plugins/pulseaudio/plugin.js", true)
-
-const {
-    psLookup
-} = await imp('@src/utils.js')
-
-const result = await psLookup({
-    command: '/usr/bin/obs',
-});
-
-console.log("a", result)
+const { setVolume } = await imp("@src/plugins/amixer/amixer.js")
 
 const start = async() => {
+    console.log('ss', await setVolume('Sound BlasterX G6', 'S/PDIF In', '5%+'))
     // const app = new Application()
     // app.addPlugin(new PulseAudioPlugin())
     // await app.readConfiguration()

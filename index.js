@@ -8,17 +8,9 @@ const SpotifyPlugin = await imp("@src/plugins/spotify/plugin.js", true)
 const I3Plugin = await imp("@src/plugins/i3/plugin.js", true)
 const ExecPlugin = await imp("@src/plugins/exec/plugin.js", true)
 const ObsPlugin = await imp("@src/plugins/obs/plugin.js", true)
+const AMixerPlugin = await imp("@src/plugins/amixer/plugins.js", true)
 
-const oldStart = async() => {
-  const pageContainer = await imp("@/configuration.js", true)
-  const app = new Application()
-  const driver = new LpDriver()
-  app.pages = pageContainer
-  app.addDevice(driver)
-  driver.connect()
-}
-
-const newStart = async() => {
+const start = async() => {
   const driver = new LpDriver()
   const app = new Application()
 
@@ -27,11 +19,11 @@ const newStart = async() => {
   app.addPlugin(new I3Plugin())
   app.addPlugin(new ExecPlugin())
   app.addPlugin(new ObsPlugin())
+  app.addPlugin(new AMixerPlugin())
 
   await app.readConfiguration()
   await app.applyConfiguration()
   app.addDevice(driver)
   driver.connect()
 }
-// oldStart()
-newStart()
+start()
