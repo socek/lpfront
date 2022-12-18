@@ -2,7 +2,7 @@ const OBSWebSocket = await imp('obs-websocket-js', true)
 
 const {
   STATES
-} = await imp("@/const.js")
+} = await imp("@/src/consts.js")
 
 const _drivers = []
 

@@ -8,7 +8,7 @@ const {
 const Key = await imp("@src/lp/key.js", true)
 const {
   STATES
-} = await imp("@/const.js")
+} = await imp("@/src/consts.js")
 
 const obs = new OBSDriver()
 

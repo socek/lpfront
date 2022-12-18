@@ -2,11 +2,12 @@ const {
   LoupedeckDevice
 } = await imp('loupedeck')
 const {
-  sleep
-} = await imp('@/utils.js')
-const {
   STATES
-} = await imp("@/const.js")
+} = await imp("@/src/consts.js")
+
+export const sleep = (ms) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 export default class LoupedeckDriver {
   state = STATES.notConnected
