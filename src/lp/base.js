@@ -26,14 +26,14 @@ export class DeviceBased {
 
   async updateData(force) {
     const newData = await this._updateData.bind(this)()
-    if (force || !isEqual(this.data, newData)) {
+    if (!this._last_update || force || !isEqual(this.data, newData)) {
       this.data = newData
       this._last_update = Date.now()
     }
   }
 
   isRefreshable() {
-    return !this._last_redraw || this._last_redraw != this._last_update
+    return !this._last_redraw || this._last_redraw < this._last_update
   }
 
   async refresh(force) {

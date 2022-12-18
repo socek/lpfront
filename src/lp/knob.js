@@ -41,4 +41,5 @@ export default class Knob extends DeviceBased {
     const drawHeight = canvases[1] - (height / 2)
     return 90 * (this.index < 3 ? this.index : this.index - 3) + drawHeight
   }
+
 }

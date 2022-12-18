@@ -53,7 +53,7 @@ export default class Page {
     }
     const toRefresh = new Set()
     for (const [index, knob] of entries(this.knobs)) {
-      await knob.updateData()
+      await knob.updateData(force)
       if (force || knob.isRefreshable()) {
         toRefresh.add(index < 3 ? 'left' : 'right')
       }
@@ -68,6 +68,9 @@ export default class Page {
         }
       }
       this.device.drawScreen(screen, drawScreen)
+    }
+    for (const [index, knob] of entries(this.knobs)) {
+      knob._last_redraw = knob._last_update = Date.now()
     }
   }
 
