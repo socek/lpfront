@@ -5,6 +5,7 @@ import {
   streamToggle,
   sourceToggle,
 } from "./keys.js"
+import {endAllConnections} from "./external.js"
 
 export default class ObsPlugin extends Plugin {
   name = "obs"
@@ -16,5 +17,9 @@ export default class ObsPlugin extends Plugin {
       streamToggle,
       sourceToggle,
     }
+  }
+
+  async onExit() {
+    await endAllConnections()
   }
 }
