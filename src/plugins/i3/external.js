@@ -24,9 +24,11 @@ export const getAllWorkspaces = async() => {
 
 export const getWorkspaceByName = async(name) => {
   const workspaces = await getAllWorkspaces()
-  for (const workspace of workspaces) {
-    if (workspace.name === name) {
-      return workspace
+  if(workspaces) {
+    for (const workspace of workspaces) {
+      if (workspace.name === name) {
+        return workspace
+      }
     }
   }
 }
