@@ -3,27 +3,9 @@ import "./imports.js"
 const Application = await imp("@src/app.js", true)
 const LpDriver = await imp("@src/driver.js", true)
 
-const PulseAudioPlugin = await imp("@src/plugins/pulseaudio/plugin.js", true)
-const SpotifyPlugin = await imp("@src/plugins/spotify/plugin.js", true)
-const I3Plugin = await imp("@src/plugins/i3/plugin.js", true)
-const ExecPlugin = await imp("@src/plugins/exec/plugin.js", true)
-const ObsPlugin = await imp("@src/plugins/obs/plugin.js", true)
-const AMixerPlugin = await imp("@src/plugins/amixer/plugins.js", true)
-
 const start = async() => {
   const driver = new LpDriver()
   const app = new Application()
-
-  app.addPlugin(new PulseAudioPlugin())
-  app.addPlugin(new SpotifyPlugin())
-  app.addPlugin(new I3Plugin())
-  app.addPlugin(new ExecPlugin())
-  app.addPlugin(new ObsPlugin())
-  app.addPlugin(new AMixerPlugin())
-
-  await app.readConfiguration()
-  await app.applyConfiguration()
-  app.addDevice(driver)
-  driver.connect()
+  app.start([driver])
 }
 start()
