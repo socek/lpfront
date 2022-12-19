@@ -1,6 +1,3 @@
-const {
-  endAllConnections
-} = await imp("@src/plugins/obs/external.js")
 const toml = await imp("toml", true)
 const {
   access,
@@ -109,7 +106,6 @@ export default class Application {
     for (const plugin of this.plugins) {
       await plugin.onExit()
     }
-    await endAllConnections()
     for (const device of this.devices) {
       await device.beforeExit()
     }
