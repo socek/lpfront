@@ -55,7 +55,7 @@ export const getVolumes = async(cardName, ctrlName) => {
 
   let stdout
   try {
-    const result = await exec(`amixer -c ${cardIndex} get '${ctrlName}'`)
+    const result = await exec(`amixer -c ${cardIndex} get '${ctrlName}' -M`)
     stdout = result.stdout
   } catch (er) {
     console.log("amixer: returned error", er)
@@ -84,7 +84,7 @@ export const toggleMute = async(cardName, ctrlName) => {
   }
 
   try {
-    await exec(`amixer -c ${cardIndex} set '${ctrlName}' toggle`)
+    await exec(`amixer -c ${cardIndex} set '${ctrlName}' toggle -M`)
   } catch (er) {
     console.log("amixer: returned error", er)
   }
@@ -99,7 +99,7 @@ export const setVolume = async(cardName, ctrlName, volume) => {
   }
 
   try {
-    await exec(`amixer -c ${cardIndex} set '${ctrlName}' ${volume}`)
+    await exec(`amixer -c ${cardIndex} set '${ctrlName}' ${volume} -M`)
   } catch (er) {
     console.log("amixer: returned error", er)
   }
