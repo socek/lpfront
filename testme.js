@@ -1,14 +1,25 @@
 import "./imports.js"
 
-const { setVolume } = await imp("@src/plugins/amixer/amixer.js")
+const {
+    OBSDriver
+} = await imp("@src/plugins/obs/external.js")
+const obs = new OBSDriver()
+const {
+    log_def_to_db,
+    log_db_to_def
+} = await imp("@src/plugins/obs/db.js")
 
 const start = async() => {
-    console.log('ss', await setVolume('Sound BlasterX G6', 'S/PDIF In', '5%+'))
+    // console.log('ss', await setVolume('Sound BlasterX G6', 'S/PDIF In', '5%+'))
     // const app = new Application()
     // app.addPlugin(new PulseAudioPlugin())
     // await app.readConfiguration()
     // await app.applyConfiguration()
-    // console.log(await getWorkspaceByName("w"));
+
+    const conn = await obs.establishConnection()
+    const percentage = await obs.getVolume("Desktop")
+    console.log("Setting:", percentage - 5)
+    await obs.setVolume("Desktop", percentage - 5)
 }
 
-start()
+await start()

@@ -1,8 +1,12 @@
 const OBSWebSocket = await imp('obs-websocket-js', true)
-
+import {
+  log_def_to_db,
+  log_db_to_def
+} from "./db.js"
 const {
   STATES
 } = await imp("@/src/consts.js")
+
 
 const _drivers = []
 
@@ -15,7 +19,7 @@ export class OBSDriver {
   }
 
   async establishConnection() {
-    if(this.state === STATES.notConnected) {
+    if (this.state === STATES.notConnected) {
       this.state = STATES.connecting
       try {
         await this.obs.connect('ws://127.0.0.1:4455', '7NvMa1NwRTCssaXI')
@@ -38,7 +42,7 @@ export class OBSDriver {
   }
 
   async endConnection() {
-    if(this.state === STATES.connected) {
+    if (this.state === STATES.connected) {
       await this.obs.disconnect()
       this.state = STATES.notConnected
     }
@@ -50,27 +54,44 @@ export class OBSDriver {
   }
 
   async setCurrentProgramScene(sceneName) {
-    return await this.obs.call('SetCurrentProgramScene', {sceneName});
+    return await this.obs.call('SetCurrentProgramScene', {
+      sceneName
+    });
   }
 
   async getSourceActive(sourceName) {
-    return await this.obs.call('GetSourceActive', {sourceName})
+    return await this.obs.call('GetSourceActive', {
+      sourceName
+    })
   }
 
   async getSourceEnabled(sourceName, sceneName) {
     sceneName = sceneName || (await this.getCurrentProgramScene())
-    let result = await this.obs.call("GetSceneItemId", {sceneName, sourceName})
+    let result = await this.obs.call("GetSceneItemId", {
+      sceneName,
+      sourceName
+    })
     const sceneItemId = result.sceneItemId
 
-    result = await this.obs.call("GetSceneItemEnabled", {sceneName, sceneItemId})
+    result = await this.obs.call("GetSceneItemEnabled", {
+      sceneName,
+      sceneItemId
+    })
     return result.sceneItemEnabled
   }
 
   async setSourceEnabled(sourceName, sceneItemEnabled, sceneName) {
     sceneName = sceneName || (await this.getCurrentProgramScene())
-    let result = await this.obs.call("GetSceneItemId", {sceneName, sourceName})
+    let result = await this.obs.call("GetSceneItemId", {
+      sceneName,
+      sourceName
+    })
     const sceneItemId = result.sceneItemId
-    return await this.obs.call("SetSceneItemEnabled", {sceneName, sceneItemId, sceneItemEnabled})
+    return await this.obs.call("SetSceneItemEnabled", {
+      sceneName,
+      sceneItemId,
+      sceneItemEnabled
+    })
   }
 
   async getVirtualCamStatus() {
@@ -91,6 +112,30 @@ export class OBSDriver {
   async toggleStream() {
     const result = await this.obs.call("ToggleStream")
     return result.outputActive
+  }
+
+  async getVolume(inputName) {
+    const result = await this.obs.call("GetInputVolume", {
+      inputName
+    })
+    return log_db_to_def(result.inputVolumeDb)
+  }
+
+  async setVolume(inputName, percentage) {
+    const inputVolumeDb = log_def_to_db(percentage)
+    const result = await this.obs.call("SetInputVolume", {
+      inputName,
+      inputVolumeDb
+    })
+    return result
+  }
+
+  async getInputMute(inputName) {
+    return (await this.obs.call("GetInputMute", {inputName})).inputMuted
+  }
+
+  async toggleInputMute(inputName) {
+    return await this.obs.call("ToggleInputMute", {inputName})
   }
 }
 

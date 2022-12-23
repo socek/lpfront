@@ -5,6 +5,9 @@ import {
   streamToggle,
   sourceToggle,
 } from "./keys.js"
+import {
+  sourceKnob,
+} from "./knobs.js"
 import {endAllConnections} from "./external.js"
 
 export default class ObsPlugin extends Plugin {
@@ -16,6 +19,12 @@ export default class ObsPlugin extends Plugin {
       virtualCameraToggle,
       streamToggle,
       sourceToggle,
+    }
+  }
+
+  getAvalibleKnobs() {
+    return {
+      "Source": sourceKnob
     }
   }
 

@@ -1,6 +1,6 @@
 import {
-  OBSDriver
-} from "./external.js"
+  obs
+} from "./consts.js"
 const {
   isEqual
 } = await imp('lodash', true)
@@ -9,8 +9,6 @@ const Key = await imp("@src/lp/key.js", true)
 const {
   STATES
 } = await imp("@/src/consts.js")
-
-const obs = new OBSDriver()
 
 export const setActiveScene = (index, {
   name,
