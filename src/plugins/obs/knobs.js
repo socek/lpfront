@@ -25,6 +25,7 @@ export const sourceKnob = (index, {
           "text": `${this.name}\n(error)`,
           "volume": null,
           "isMuted": null,
+          "background": "grey",
         }
       }
       if(isMuted) {
@@ -32,12 +33,14 @@ export const sourceKnob = (index, {
           "text": `${this.name}\n(MUTED)`,
           "volume": volume,
           "isMuted": isMuted,
+          "background": "red",
         }
       } else {
         return {
           "text": `${this.name}\n${volume}%`,
           "volume": volume,
           "isMuted": isMuted,
+          "background": "green",
         }
       }
     }
@@ -46,6 +49,7 @@ export const sourceKnob = (index, {
       "text": `${this.name}`,
       "volume": null,
       "isMuted": null,
+      "background": "grey",
     }
   }
 

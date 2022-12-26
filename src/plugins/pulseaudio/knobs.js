@@ -17,17 +17,20 @@ export const sinkKnob = (index, {
     for (const sink of sinks) {
       if (sink.data.mute) {
         return {
-          "text": `${name}(mute)`
+          "text": `${name}(mute)`,
+          "background": "red",
         }
       }
       for (const [key, volume] of entries(sink.data.volume)) {
         return {
-          "text": `${name}${volume.value_percent}`
+          "text": `${name}${volume.value_percent}`,
+          "background": "green",
         }
       }
     }
     return {
-      "text": `${name}(off)`
+      "text": `${name}(off)`,
+      "background": "grey",
     }
   }
 

@@ -3,6 +3,9 @@ const {
 } = await imp("@src/lp/base.js")
 
 const canvases = [60 / 2, 270 / 3 / 2]
+const rectMarginTop = 15
+const rectMarginBottom = 30
+const rectHigh = 90
 
 export default class Knob extends DeviceBased {
   constructor(index, name, {
@@ -28,6 +31,9 @@ export default class Knob extends DeviceBased {
 
   _redraw(ctx, forceBackground) {
     const background = forceBackground || (this.data && this.data.background) || 'black'
+    const {top, left, bottom, right} = this.getKnobDrawLeftCorner()
+    ctx.fillStyle = background
+    ctx.fillRect(left, top, right, bottom)
     ctx.font = "11px consolas";
     ctx.textBaseline = "top";
     ctx.fillStyle = "white";
@@ -40,6 +46,14 @@ export default class Knob extends DeviceBased {
     const height = ctx.measureText(this.getText())["emHeightDescent"]
     const drawHeight = canvases[1] - (height / 2)
     return 90 * (this.index < 3 ? this.index : this.index - 3) + drawHeight
+  }
+
+  getKnobDrawLeftCorner() {
+    const top = rectMarginTop + (rectHigh * (this.index % 3))
+    const left = 0
+    const bottom = rectHigh - rectMarginBottom
+    const right = 60
+    return {top, left, bottom, right}
   }
 
 }

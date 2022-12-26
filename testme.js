@@ -1,25 +1,14 @@
 import "./imports.js"
 
 const {
-    OBSDriver
-} = await imp("@src/plugins/obs/external.js")
-const obs = new OBSDriver()
-const {
-    log_def_to_db,
-    log_db_to_def
-} = await imp("@src/plugins/obs/db.js")
+    getSinks
+} = await imp("@src/plugins/pulseaudio/pulseaudio.js")
 
 const start = async() => {
-    // console.log('ss', await setVolume('Sound BlasterX G6', 'S/PDIF In', '5%+'))
-    // const app = new Application()
-    // app.addPlugin(new PulseAudioPlugin())
-    // await app.readConfiguration()
-    // await app.applyConfiguration()
-
-    const conn = await obs.establishConnection()
-    const percentage = await obs.getVolume("Desktop")
-    console.log("Setting:", percentage - 5)
-    await obs.setVolume("Desktop", percentage - 5)
+    const result = await getSinks()
+    for(const row of result) {
+        console.log(row.name)
+    }
 }
 
 await start()

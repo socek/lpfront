@@ -21,15 +21,18 @@ export const ControllerKnob = (index, {
       const [key, volume] = entries(volumes)[0]
       if (volume.state === 'off') {
         return {
-          "text": `${name}(mute)`
+          "text": `${name}(mute)`,
+          "background": "red",
         }
       }
       return {
-        "text": `${name}${volume.volume}%`
+        "text": `${name}${volume.volume}%`,
+        "background": "green",
       }
     }
     return {
-      "text": `${name}(off)`
+      "text": `${name}(off)`,
+      "background": "grey",
     }
   }
 

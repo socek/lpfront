@@ -5,7 +5,7 @@
   "author": "Socek",
   "license": "MIT",
   "dependencies": {
-    "canvas": "^2.10.2",
+    "canvas": "^2.11.0",
     "concat": "^1.0.3",
     "concat-stream": "^2.0.0",
     "dbus-next": "^0.10.2",
