@@ -4,7 +4,9 @@ import {
 const {
   STATES
 } = await imp("@/src/consts.js")
-const Knob = await imp("@src/lp/knob.js", true)
+const {
+  Knob
+} = await imp("@src/lp/knob.js")
 
 export const sourceKnob = (index, {
   name,
@@ -28,7 +30,7 @@ export const sourceKnob = (index, {
           "background": "grey",
         }
       }
-      if(isMuted) {
+      if (isMuted) {
         return {
           "text": `${this.name}\n(MUTED)`,
           "volume": volume,
@@ -62,7 +64,7 @@ export const sourceKnob = (index, {
   async function onChange(delta) {
     const conn = await obs.establishConnection()
     if (conn == STATES.connected) {
-      if(this.data.volume !== undefined) {
+      if (this.data.volume !== undefined) {
         const volume = this.data.volume + changeValue * (delta == 1 ? 1 : -1)
         this.data.volume = volume
         this._last_update = Date.now()

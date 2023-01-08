@@ -1,4 +1,6 @@
-const Knob = await imp("@src/lp/knob.js", true)
+const {
+  CircleKnob
+} = await imp("@src/lp/knob.js")
 const {
   entries
 } = await imp('@src/utils.js')
@@ -17,20 +19,29 @@ export const sinkKnob = (index, {
     for (const sink of sinks) {
       if (sink.data.mute) {
         return {
-          "text": `${name}(mute)`,
+          "text": `${name}`,
           "background": "red",
+          "percentage": 0,
+          "muted": true,
+          "state": true,
         }
       }
       for (const [key, volume] of entries(sink.data.volume)) {
         return {
-          "text": `${name}${volume.value_percent}`,
-          "background": "green",
+          "text": `${name}`,
+          "percentage": volume.value_percent.replace('%', ''),
+          "background": "black",
+          "muted": false,
+          "state": true,
         }
       }
     }
     return {
-      "text": `${name}(off)`,
+      "text": `${name}`,
       "background": "grey",
+      "percentage": 0,
+      "muted": false,
+      "state": false,
     }
   }
 
@@ -46,7 +57,7 @@ export const sinkKnob = (index, {
       await sink.setVolume(delta == 1 ? "+5%" : "-5%")
     }
   }
-  return new Knob(index, name, {
+  return new CircleKnob(index, name, {
     updateData,
     onClick,
     onChange
