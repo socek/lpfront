@@ -137,6 +137,18 @@ export class OBSDriver {
   async toggleInputMute(inputName) {
     return await this.obs.call("ToggleInputMute", {inputName})
   }
+
+  async getReplayBufferStatus() {
+   return (await this.obs.call("GetReplayBufferStatus")).outputActive
+  }
+
+  async toggleReplayBuffer() {
+    return await this.obs.call("ToggleReplayBuffer")
+  }
+
+  async saveReplayBuffer() {
+    return await this.obs.call("SaveReplayBuffer")
+  }
 }
 
 export const endAllConnections = async() => {

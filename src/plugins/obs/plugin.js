@@ -4,6 +4,8 @@ import {
   virtualCameraToggle,
   streamToggle,
   sourceToggle,
+  replyBufferToggle,
+  saveReplayBuffer,
 } from "./keys.js"
 import {
   sourceKnob,
@@ -19,6 +21,8 @@ export default class ObsPlugin extends Plugin {
       virtualCameraToggle,
       streamToggle,
       sourceToggle,
+      replyBufferToggle,
+      saveReplayBuffer,
     }
   }
 

@@ -202,3 +202,102 @@ export const sourceToggle = (index, {
     onClick,
   })
 }
+
+
+export const replyBufferToggle = (index, {name}) => {
+  async function onClick() {
+    const conn = await obs.establishConnection()
+    if (conn == STATES.connected) {
+      try {
+        await obs.toggleReplayBuffer()
+      } catch (er) {
+        return
+      }
+      this.refresh()
+    }
+  }
+
+  async function updateData() {
+    const conn = await obs.establishConnection()
+    if (conn == STATES.connected) {
+      let isActive = null
+      try {
+        isActive = (await obs.getReplayBufferStatus())
+      } catch (er) {
+        return {
+          "text": `${this.name}`,
+          "background": "grey",
+          "isActive": false,
+        }
+      }
+      const background = isActive ? 'green' : 'black'
+      return {
+        "isActive": isActive,
+        "text": `${this.name}`,
+        background
+      }
+    }
+
+    return {
+      "text": `${this.name}`,
+      "background": "grey",
+      "isActive": false,
+    }
+  }
+
+  return new Key(index, name, {
+    updateData,
+    onClick,
+  })
+}
+
+export const saveReplayBuffer = (index, {name}) => {
+  async function onClick() {
+    const conn = await obs.establishConnection()
+    if (conn == STATES.connected) {
+      try {
+        if (this.data["isActive"])  {
+          await obs.saveReplayBuffer()
+        } else {
+          await obs.toggleReplayBuffer()
+        }
+      } catch (er) {
+        return
+      }
+      this.refresh()
+    }
+  }
+
+  async function updateData() {
+    const conn = await obs.establishConnection()
+    if (conn == STATES.connected) {
+      let isActive = null
+      try {
+        isActive = (await obs.getReplayBufferStatus())
+      } catch (er) {
+        return {
+          "text": `${this.name}`,
+          "background": "grey",
+          "isActive": false,
+        }
+      }
+      const background = isActive ? 'black' : 'red'
+      return {
+        "isActive": isActive,
+        "text": `${this.name}`,
+        background
+      }
+    }
+
+    return {
+      "text": `${this.name}`,
+      "background": "grey",
+      "isActive": false,
+    }
+  }
+
+  return new Key(index, name, {
+    updateData,
+    onClick,
+  })
+}
