@@ -4,7 +4,8 @@ const {
 
 const Key = await imp("@src/lp/key.js", true)
 const {
-    spawn
+    spawn,
+    exec,
 } = await imp("child_process")
 
 const isProgramRunning = async(command) => {
@@ -37,6 +38,28 @@ export const startApplication = (index, {
                 "text": name,
             }
         }
+        return {
+            "background": "black",
+            "text": name,
+        }
+    }
+
+    return new Key(index, name, {
+        updateData,
+        onClick,
+    })
+}
+
+
+export const simpleExec = (index, {
+    name,
+    run,
+}) => {
+    async function onClick() {
+        exec(run)
+    }
+
+    async function updateData() {
         return {
             "background": "black",
             "text": name,

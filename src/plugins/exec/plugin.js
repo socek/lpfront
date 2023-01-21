@@ -1,6 +1,7 @@
 const Plugin = await imp("@src/plugin.js", true)
 import {
-  startApplication
+  startApplication,
+  simpleExec,
 } from "./keys.js"
 
 export default class ExecPlugin extends Plugin {
@@ -8,7 +9,8 @@ export default class ExecPlugin extends Plugin {
 
   getAvalibleKeys() {
     return {
-      startApplication
+      startApplication,
+      simpleExec,
     }
   }
 }
