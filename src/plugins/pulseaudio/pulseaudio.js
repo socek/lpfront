@@ -60,10 +60,12 @@ class PASink extends PAItem {
     "mute": "set-sink-mute",
     "setVolume": "set-sink-volume",
   }
+
   constructor(data) {
     super(data)
     this.type = "Sink"
   }
+
 }
 
 class PASinkInput extends PAItem {
@@ -76,6 +78,12 @@ class PASinkInput extends PAItem {
     super(data)
     this.name = data.properties["application.name"]
     this.type = "Sink Input"
+  }
+
+  async switchOutput(outputId) {
+    const cmd = `pactl move-sink-input ${this.data.index} ${outputId}`
+    await exec(cmd)
+    invalidateCache()
   }
 }
 
@@ -142,4 +150,15 @@ export const isSinksEqual = (left, right) => {
   delete left.data.latency
   delete right.data.latency
   return isEqual(left, right)
+}
+
+export const getSinksByType = async(typename) => {
+  const sinks = await getSinks()
+  const results = []
+  for (const paitem of sinks) {
+    if (paitem.type === typename) {
+      results.push(paitem)
+    }
+  }
+  return results
 }

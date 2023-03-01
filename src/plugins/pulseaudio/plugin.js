@@ -1,6 +1,6 @@
 const Plugin = await imp("@src/plugin.js", true)
 const {sinkKnob} = await imp("@src/plugins/pulseaudio/knobs.js")
-const {microphoneKey} = await imp("@src/plugins/pulseaudio/keys.js")
+const {microphoneKey, sinkSwitchKey} = await imp("@src/plugins/pulseaudio/keys.js")
 
 export default class PulseAudioPlugin extends Plugin {
   name = "pulseaudio"
@@ -12,7 +12,8 @@ export default class PulseAudioPlugin extends Plugin {
   }
   getAvalibleKeys() {
     return {
-      "Microphone": microphoneKey
+      "Microphone": microphoneKey,
+      "SinkSwitch": sinkSwitchKey,
     }
   }
 }

@@ -54,12 +54,26 @@ export const startApplication = (index, {
 export const simpleExec = (index, {
     name,
     run,
+    psname,
 }) => {
     async function onClick() {
         exec(run)
     }
 
     async function updateData() {
+        if(!psname) {
+            return {
+                "background": "black",
+                "text": name,
+            }
+        }
+        const isRunning = await isProgramRunning(psname || run)
+        if (isRunning) {
+            return {
+                "background": "green",
+                "text": name,
+            }
+        }
         return {
             "background": "black",
             "text": name,

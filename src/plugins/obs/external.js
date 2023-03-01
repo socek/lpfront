@@ -7,6 +7,7 @@ const {
   STATES
 } = await imp("@/src/consts.js")
 
+const reconnectWaitTime = 1000 // in miliseconds
 
 const _drivers = []
 
@@ -15,20 +16,33 @@ export class OBSDriver {
 
   constructor() {
     this.obs = new OBSWebSocket()
+    this.lastReconnect = null
     _drivers.push(this)
+  }
+
+  isReconnectTimeoutPassed() {
+    if(!this.lastReconnect) {
+      return true
+    }
+    return new Date() - this.lastReconnect >= reconnectWaitTime
   }
 
   async establishConnection() {
     if (this.state === STATES.notConnected) {
-      this.state = STATES.connecting
-      try {
-        await this.obs.connect('ws://127.0.0.1:4455', '7NvMa1NwRTCssaXI')
-      } catch (error) {
-        this.state = STATES.notConnected
+      if (this.isReconnectTimeoutPassed()) {
+        this.lastReconnect = new Date()
+        this.state = STATES.connecting
+        try {
+          await this.obs.connect('ws://127.0.0.1:4455', '7NvMa1NwRTCssaXI')
+        } catch (error) {
+          this.state = STATES.notConnected
+          return this.state
+        }
+        console.info("Connection to obs established")
+        this.state = STATES.connected
+      } else {
         return this.state
       }
-      console.info("Connection to obs established")
-      this.state = STATES.connected
     } else {
       try {
         await this.obs.call('GetVersion')

@@ -1,6 +1,10 @@
 const {
   DeviceBased
 } = await imp("@src/lp/base.js")
+const sleep = (ms) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+const keyHoverTimeout = 100
 
 const size = [90 / 2, 90 / 2]
 
@@ -13,13 +17,20 @@ export default class Key extends DeviceBased {
       updateData
     })
     this.onClick = (onClick || (() => {})).bind(this)
+    this._onHoverMade = null
   }
 
   async onHover() {
     this.forceRedraw("blue")
+    this._onHoverMade = Date.now()
   }
 
   async onHoverOff() {
+    const millis = Date.now() - this._onHoverMade
+
+    if(millis < keyHoverTimeout) {
+      await sleep(keyHoverTimeout - millis)
+    }
     this.forceRedraw()
   }
 
